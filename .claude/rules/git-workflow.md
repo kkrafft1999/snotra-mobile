@@ -7,17 +7,19 @@ and adapted to a repository that has no code and no pipeline yet.
 A finished task is carried through to a merged pull request without the user
 triggering each step. `main` carries one commit per pull request.
 
-## The gate, now and later
+## The gate
 
-- **Now:** there is no Xcode project, no test and no CI. `main` has **no
-  ruleset** yet. The rule still
-  holds without the machine behind it: every change goes through a pull
-  request, nothing is pushed to `main` directly.
-- **As soon as the Xcode project exists:** a workflow under `.github/workflows/`
-  runs the tests on macOS, and a ruleset on `main` makes that check required,
-  forbids force-pushing and deleting the branch, with no bypass actors — as in
-  Snotra. Setting up the ruleset changes the repository's protection, so the
-  user decides it (see *Ask first*).
+Since 2026-10-17 (#6) a **ruleset on `main`** ("main protected") requires a
+pull request, forbids force-pushing and deleting the branch, allows squash
+merges only and makes the check **`Tests (iOS simulator)`** mandatory. It has
+**no bypass actors**: a direct push to `main` fails for the owner as well. A
+red state does not get through, not even by accident.
+
+The check comes from [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml):
+a macOS runner picks the newest Xcode on the image and an available iPhone
+simulator and runs `xcodebuild test`. Renaming the job means changing the
+ruleset in the same breath, or every pull request waits for a check that never
+comes.
 
 ## Without asking
 
@@ -25,8 +27,8 @@ triggering each step. `main` carries one commit per pull request.
    does (`feature/qr-pairing`, `fix/keychain-access-group`, `docs/relay-budget`).
 2. **Commit in readable steps** as the work goes, in English, imperative mood,
    one concern per commit (see [`language.md`](./language.md)).
-3. **Push and open the pull request as soon as the task is done** and, once
-   tests exist, they ran green locally (`xcodebuild test` against an iPhone
+3. **Push and open the pull request as soon as the task is done** and the
+   tests ran green locally (`xcodebuild test` against an iPhone
    simulator). The pull request carries `Closes #N` for the matching issue (see
    [`task-management.md`](./task-management.md)) — in English, a German
    "Schließt #N" closes nothing. Title and body are English.
@@ -43,7 +45,7 @@ number, merge, deleted branch.
 
 ## What is checked before merging
 
-- **All required checks green** — once there are any. Not skipped, not still
+- **All required checks green** — not skipped, not still
   running. "It's running" is not a result.
 - **No conflicts with `main`** (`mergeable: MERGEABLE`, status `CLEAN`).
 - **No open reviews or comments** that call for an answer — including from bots,
