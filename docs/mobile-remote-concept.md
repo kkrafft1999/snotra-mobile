@@ -411,16 +411,18 @@ Decided on 2026-10-17:
 - **The relay's code** is built in
   [snotra-promotion](https://github.com/kkrafft1999/snotra-promotion) and runs in
   its Firebase project, next to the feedback function (§4).
-- **One device.** The picture is one person who works at the desktop and, away
-  from it, reaches that desktop from one phone. Pairing a second device at the
-  same time (say a phone and a tablet) is not planned; a new pairing replaces
-  the old one (R1, §5).
+- **One device per desktop installation.** A Snotra desktop installation can
+  have exactly one paired device, never a second one alongside it (say a phone
+  and a tablet). The picture is one person who works at the desktop and, away
+  from it, reaches that desktop from one phone. A new pairing replaces the old
+  one (R1, §5).
 - **Privacy notice** on the snotra-promotion website, once the relay is live,
   listing what §6 says the relay sees.
-- **Cost ceiling: a budget of USD 100** on the Firebase project. Because the
-  project is shared, the budget covers the website and the relay together, and
-  reaching it raises an alert — it does not stop anything. A hard stop would
-  take the website down with the relay, so there is none for now.
+- **Cost ceiling: USD 100 over ten months, at most USD 10 a month.** It is set
+  up as a monthly budget of USD 10 on the Firebase project. Because the project
+  is shared, the budget covers the website and the relay together, and reaching
+  it raises an alert — it does not stop anything. A hard stop would take the
+  website down with the relay, so there is none for now.
 
 Still open:
 
