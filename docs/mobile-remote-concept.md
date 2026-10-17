@@ -84,7 +84,7 @@ SEC-6 covers the relay.
 | Piece | Where it lives | Holds | Does |
 | ----- | -------------- | ----- | ---- |
 | **Remote bridge** | [Snotra](https://github.com/kkrafft1999/snotra), `src/main/remote/` (driving adapter) and `src/application/` (the parts that decide) | The desktop's identity key (in `safeStorage`), the paired phone's public key, the per-workspace release | Pairing, encryption, translating protocol messages into calls on the conversation service and back; the presence indicator |
-| **Relay** | A Firebase project of its own (`snotra-relay`), **not** the website's project | Channel records and encrypted envelopes with a short time to live | Pairing endpoints, minting access tokens, carrying envelopes both ways, presence, clean-up |
+| **Relay** | Code in [snotra-promotion](https://github.com/kkrafft1999/snotra-promotion), next to the feedback function; runs in the website's Firebase project `snotra-ai`, with a database and a Functions codebase of its own | Channel records and encrypted envelopes with a short time to live | Pairing endpoints, minting access tokens, carrying envelopes both ways, presence, clean-up |
 | **Mobile app** | This repository, `snotra-mobile` — Swift and SwiftUI, iPhone first, implemented later | The phone's identity keys (in the Secure Enclave), the desktop's public keys and the channel id (Keychain, this device only) — nothing else on disk | Shows and drives what the desktop sends |
 | **Protocol** | [Snotra](https://github.com/kkrafft1999/snotra): `docs/remote-protocol.md` and `src/shared/contracts/remote/`, with test vectors | — | The contract all three follow, versioned |
 
@@ -92,11 +92,25 @@ Why the protocol lives in the Snotra repository: the desktop is the authority on
 what a front end may do. This repository pins a protocol version and runs
 the test vectors from there; the relay never needs to understand it.
 
-Why the relay is not in the website's Firebase project: the rule in
-[`task-management.md`](https://github.com/kkrafft1999/snotra/blob/main/.claude/rules/task-management.md) — nothing in Snotra
-depends on the website — holds the other way round as well. A broken deploy of
-the website must not take the relay down, and a relay quota must not take the
-website down.
+Why the relay lives in the website's Firebase project: decided by the user on
+2026-10-17. The relay belongs on the same Firebase server as the feedback
+function, so its code is built in
+[snotra-promotion](https://github.com/kkrafft1999/snotra-promotion) and deployed
+to that project, `snotra-ai`. The separation this concept first asked for is
+kept inside the project instead:
+
+- **Its own database.** The relay uses a Realtime Database instance of its own;
+  the website uses Firestore. Each has its own rules.
+- **Its own Functions codebase** (`relay`, next to `default` in `firebase.json`),
+  deployed on its own with `firebase deploy --only functions:relay`, so a
+  website deploy does not redeploy the relay and the other way round.
+
+What stays shared is the project's quota and its bill (§10). It also bends the
+rule in
+[`task-management.md`](https://github.com/kkrafft1999/snotra/blob/main/.claude/rules/task-management.md)
+that nothing in Snotra depends on the website: the desktop's remote feature now
+depends on the website's project. That is accepted because the feature is off
+by default (R7) and the desktop is unaffected when the relay is down (§6).
 
 ### 4.1 Desktop: the remote bridge is a second front end
 
@@ -381,28 +395,39 @@ the app fetches the actual card over the channel.
 | ----- | ---- | ----- | ---------- |
 | 0 | Conversation in the core ([snotra#981](https://github.com/kkrafft1999/snotra/issues/981)), confirmation port ([snotra#980](https://github.com/kkrafft1999/snotra/issues/980)), remote interface ADR widened to the relay ([snotra#989](https://github.com/kkrafft1999/snotra/issues/989)) | Snotra | — |
 | 1 | Protocol spec and test vectors; remote bridge with pairing, encryption, presence; desktop UI (*Settings › Remote access*, workspace switch, connection indicator, phone mark on messages) | Snotra | 0 |
-| 2 | Relay: Firebase project, Functions, database rules, clean-up; tested against the Firebase emulator | relay | 1 (protocol) |
+| 2 | Relay: Realtime Database instance, Functions codebase, database rules, clean-up; tested against the Firebase emulator | snotra-promotion | 1 (protocol) |
 | 3 | A small reference client in Node in Snotra's `e2e/` that pairs and chats through the emulator — the desktop's end-to-end test, and the mobile app's reference | Snotra | 1, 2 |
 | 4 | Mobile app MVP | this repository | 1–3 |
-| 5 | Push notifications, images, a second device for the same user (if ever wanted) | all | 4 |
+| 5 | Push notifications, images | all | 4 |
 
 Phase 3 matters: it lets the desktop side be finished and tested before a
 single line of the mobile app exists, and gives that app a client to compare
 against.
 
-## 10. Open points
+## 10. Decisions and open points
 
-- **The relay's code:** its own repository, or a `relay/` folder in
-  `snotra-mobile`. The relay is small and protocol-blind, so either works; it
-  must not live in the website's project (§4).
-- **A second device of the same user** (phone and tablet). R1 allows it in
-  principle — it is still one person — but one device keeps the rule simple to
-  check. The first version allows one.
+Decided on 2026-10-17:
+
+- **The relay's code** is built in
+  [snotra-promotion](https://github.com/kkrafft1999/snotra-promotion) and runs in
+  its Firebase project, next to the feedback function (§4).
+- **One device.** The picture is one person who works at the desktop and, away
+  from it, reaches that desktop from one phone. Pairing a second device at the
+  same time (say a phone and a tablet) is not planned; a new pairing replaces
+  the old one (R1, §5).
+- **Privacy notice** on the snotra-promotion website, once the relay is live,
+  listing what §6 says the relay sees.
+- **Cost ceiling: a budget of USD 100** on the Firebase project. Because the
+  project is shared, the budget covers the website and the relay together, and
+  reaching it raises an alert — it does not stop anything. A hard stop would
+  take the website down with the relay, so there is none for now.
+
+Still open:
+
+- **How many messages go over the relay.** The user base is small and the app
+  is in testing; the numbers from that phase decide whether the budget holds.
+- **A paid upgrade.** If the relay's cost grows, the remote feature may later
+  become part of a paid upgrade. Not decided yet.
 - **What the desktop does on a phone message while the user sits in front of
   it** — nothing special is planned; the message appears in the chat with its
   phone mark.
-- **Privacy notice** on the website (not in either repository) once the relay is
-  live, listing what §6 says the relay sees.
-- **Cost ceiling.** The Firebase project needs a budget and a decision on what
-  happens when it is reached — a relay that stops is acceptable, a bill that
-  grows is not.
