@@ -11,7 +11,7 @@ An iPhone app for [Snotra Agent](https://github.com/kkrafft1999/snotra): when yo
 - **End-to-end encrypted.** Messages travel through a blind relay in Firebase that cannot read them.
 - **One user.** Exactly one phone per desktop installation. It is a second way in for the same person, never for someone else.
 
-The full concept is [`docs/mobile-remote-concept.md`](https://github.com/kkrafft1999/snotra/blob/main/docs/mobile-remote-concept.md) in the Snotra repository, tracked in the epic [kkrafft1999/snotra#1081](https://github.com/kkrafft1999/snotra/issues/1081). The protocol is owned there too; this app follows a pinned protocol version and its test vectors.
+The concept, which is the basis for building the app, is [`docs/mobile-remote-concept.md`](docs/mobile-remote-concept.md), with the diagram [`docs/mobile-remote-architecture.svg`](docs/mobile-remote-architecture.svg). The work is tracked in the epic [kkrafft1999/snotra#1081](https://github.com/kkrafft1999/snotra/issues/1081). The protocol belongs to the desktop and will be specified in the Snotra repository; this app follows a pinned protocol version and its test vectors.
 
 ## Stack
 
