@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Snotra mobile app icon: the owl from Snotra's assets/icon/icon-macos.svg,
+     redrawn full-bleed for iOS. No corner radius, no shadow, no transparency:
+     iOS applies its own mask. Render with scripts/render-app-icon.sh. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1188B4"/>
+      <stop offset="1" stop-color="#00658A"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#bg)"/>
+  <!-- Scaled up a little from the macOS layout, but less than the full
+       1024/824, so the ears stay clear of the rounded corners iOS masks off. -->
+  <g id="owl" transform="translate(512 512) scale(1.1) translate(-512 -512)">
+    <path d="M292 262 L390 352 Q512 306 634 352 L732 262 V576 A220 220 0 0 1 292 576 Z"
+          fill="#FFFFFF" stroke="#FFFFFF" stroke-width="20" stroke-linejoin="round"/>
+    <circle cx="428" cy="480" r="74" fill="#00658A"/>
+    <circle cx="596" cy="480" r="74" fill="#00658A"/>
+    <circle cx="448" cy="460" r="22" fill="#FFFFFF"/>
+    <circle cx="616" cy="460" r="22" fill="#FFFFFF"/>
+    <path d="M482 566 H542 L512 616 Z" fill="#00658A" stroke="#00658A" stroke-width="16" stroke-linejoin="round"/>
+  </g>
+</svg>

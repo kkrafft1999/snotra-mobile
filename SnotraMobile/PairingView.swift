@@ -13,6 +13,7 @@ struct PairingView: View {
             } description: {
                 Text("It arrives together with remote access in Snotra on your desktop.")
             }
+            .background(Color.background)
             .navigationTitle("Pair with your desktop")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

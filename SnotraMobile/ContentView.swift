@@ -14,8 +14,10 @@ struct ContentView: View {
             }
             .buttonStyle(.borderedProminent)
             .controlSize(.large)
+            .foregroundStyle(Color.onAccent)
             .accessibilityIdentifier("startPairing")
         }
+        .background(Color.background)
         .sheet(isPresented: $isPairingPresented) {
             PairingView()
         }
