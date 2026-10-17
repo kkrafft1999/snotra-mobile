@@ -10,7 +10,7 @@ triggering each step. `main` carries one commit per pull request.
 ## The gate, now and later
 
 - **Now:** there is no Xcode project, no test and no CI. `main` has **no
-  ruleset** yet and *Automatically delete head branches* is off. The rule still
+  ruleset** yet. The rule still
   holds without the machine behind it: every change goes through a pull
   request, nothing is pushed to `main` directly.
 - **As soon as the Xcode project exists:** a workflow under `.github/workflows/`
@@ -31,9 +31,12 @@ triggering each step. `main` carries one commit per pull request.
    [`task-management.md`](./task-management.md)) — in English, a German
    "Schließt #N" closes nothing. Title and body are English.
 4. **Squash-merge** once the checks below pass, with the pull request number in
-   the title. Then delete the head branch (on GitHub, unless *Automatically
-   delete head branches* has been switched on, and locally) and bring `main` in
-   the main checkout up to date with `git pull --ff-only`.
+   the title. GitHub deletes the head branch on merge (*Automatically delete
+   head branches*, `delete_branch_on_merge`, on since 2026-10-17) — check that
+   it is gone, don't delete it by hand, and never before the merge: a pull
+   request whose head branch disappears is closed unmerged. Then tidy up the
+   local branch and bring `main` in the main checkout up to date with
+   `git pull --ff-only`.
 
 The user is told afterwards, in one sentence, what happened: pull request
 number, merge, deleted branch.
