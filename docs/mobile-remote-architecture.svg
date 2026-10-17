@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1016" viewBox="0 0 1600 1016" role="img" aria-labelledby="title description">
   <title id="title">Snotra Agent — mobile remote: architecture</title>
-  <desc id="description">The desktop app with a new remote bridge on top of the application core and the local store, a blind relay in its own Firebase project made of Cloud Functions and a Realtime Database, and the iPhone app in Swift and SwiftUI with its keys in the Secure Enclave. Pairing goes from the desktop screen to the phone camera by QR code or typed key. Messages travel through the relay as encrypted envelopes; the end-to-end encrypted channel runs between the remote bridge and the phone, and the relay cannot read it. One user, at the desk or away from it. Concept of 2026-10-17, revised the same day for SwiftUI and CryptoKit.</desc>
+  <desc id="description">The desktop app with a new remote bridge on top of the application core and the local store, a blind relay in the website's Firebase project snotra-ai, with Cloud Functions and a Realtime Database of its own, and the iPhone app in Swift and SwiftUI with its keys in the Secure Enclave. Pairing goes from the desktop screen to the phone camera by QR code or typed key. Messages travel through the relay as encrypted envelopes; the end-to-end encrypted channel runs between the remote bridge and the phone, and the relay cannot read it. One user, at the desk or away from it. Concept of 2026-10-17, revised the same day for SwiftUI and CryptoKit.</desc>
 
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
@@ -91,8 +91,8 @@
 
   <!-- Relay boundary -->
   <rect class="boundary" x="680" y="330" width="360" height="430" rx="10"/>
-  <text class="boundary-label" x="700" y="730">Firebase project snotra-relay</text>
-  <text class="boundary-tag" x="700" y="748">[blind relay · not the website's project]</text>
+  <text class="boundary-label" x="700" y="730">Firebase project snotra-ai</text>
+  <text class="boundary-tag" x="700" y="748">[blind relay · own database and Functions]</text>
 
   <rect class="container--new" x="710" y="360" width="300" height="130" rx="8"/>
   <text class="name" x="728" y="388">Cloud Functions</text>
