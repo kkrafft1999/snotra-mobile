@@ -1,0 +1,26 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Not paired" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nicht gekoppelt"
+          }
+        }
+      }
+    },
+    "Pair this iPhone with Snotra on your desktop to follow and drive its chats." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kopple dieses iPhone mit Snotra auf deinem Desktop, um seine Chats zu verfolgen und zu steuern."
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}
