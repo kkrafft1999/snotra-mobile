@@ -1,0 +1,56 @@
+name: CI
+
+# Builds the app and runs its unit tests in an iPhone simulator on pull
+# requests and pushes to main. The job's check name is required by the
+# ruleset on main (#6), so renaming the job means changing the ruleset too.
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Tests (iOS simulator)
+    runs-on: macos-latest
+    # A green run takes a few minutes; this is a backstop for a hung simulator,
+    # not a budget.
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # The runner image carries several Xcode versions; take the newest one,
+      # since the project needs folder-synchronised groups and Swift 6.
+      - name: Select Xcode
+        run: |
+          xcode=$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)
+          sudo xcode-select -s "$xcode/Contents/Developer"
+          xcodebuild -version
+
+      # Simulator names change with every Xcode; pick the first available
+      # iPhone instead of hard-coding one.
+      - name: Pick a simulator
+        id: simulator
+        run: |
+          udid=$(xcrun simctl list devices available --json \
+            | jq -r '[.devices[][] | select(.name | startswith("iPhone"))][0].udid')
+          test -n "$udid" && test "$udid" != null
+          xcrun simctl list devices available | grep "$udid"
+          echo "udid=$udid" >> "$GITHUB_OUTPUT"
+
+      - name: Build and test
+        run: |
+          xcodebuild test \
+            -project SnotraMobile.xcodeproj \
+            -scheme SnotraMobile \
+            -destination "id=${{ steps.simulator.outputs.udid }}" \
+            -derivedDataPath DerivedData \
+            CODE_SIGNING_ALLOWED=NO
