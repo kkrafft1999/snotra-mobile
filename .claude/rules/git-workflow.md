@@ -69,10 +69,16 @@ merge.
 
 ## Worktrees
 
-Work happens in the **main checkout**, on the task's branch. A worktree is only
-for the case that another session already works in this repository at the same
-time; then the second session takes a worktree with a branch of its own, so the
-two don't get in each other's way.
+Work happens in the **main checkout** (`~/Projects/snotra-mobile`), on the
+task's branch — that is the folder the user sees in the Finder and opens in
+Xcode. Files that only exist in a worktree under `.claude/worktrees/` are
+invisible there.
+
+A worktree is used **only when the user asks for it explicitly**, typically to
+run tasks in parallel sessions (user decision, 2026-10-17). A session that the
+app started in a worktree anyway says so at the start, moves the work into the
+main checkout (detach the branch in the worktree, `git switch <branch>` in the
+main checkout) and carries on there.
 
 When a session ran in a worktree, its result still ends up on `main` the normal
 way — pull request, squash merge — and the main checkout is updated with
