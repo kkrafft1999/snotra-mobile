@@ -60,3 +60,8 @@ fastlane/report.xml
 fastlane/Preview.html
 fastlane/screenshots/**/*.png
 fastlane/test_output
+
+# Claude Code: worktrees and personal settings stay local
+.claude/worktrees/
+.claude/settings.local.json
+.DS_Store
