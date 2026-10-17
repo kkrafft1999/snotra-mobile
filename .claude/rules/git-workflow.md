@@ -9,7 +9,7 @@ triggering each step. `main` carries one commit per pull request.
 
 ## The gate
 
-Since 2026-10-17 (#6) a **ruleset on `main`** ("main protected") requires a
+Since 2026-10-17 (#6) a **ruleset on `main`** (`25310567`, "main protected") requires a
 pull request, forbids force-pushing and deleting the branch, allows squash
 merges only and makes the check **`Tests (iOS simulator)`** mandatory. It has
 **no bypass actors**: a direct push to `main` fails for the owner as well. A
