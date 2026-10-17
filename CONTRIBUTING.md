@@ -34,6 +34,10 @@ xcodebuild test -project SnotraMobile.xcodeproj -scheme SnotraMobile \
 `xcrun simctl list devices available` lists the simulators to pick from.
 Tests use [Swift Testing](https://developer.apple.com/documentation/testing).
 
+The same test run is the required check `Tests (iOS simulator)` on every pull
+request ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)); `main`
+accepts nothing that has not passed it.
+
 ## Strings
 
 Every string the user sees goes into `SnotraMobile/Localizable.xcstrings`,
