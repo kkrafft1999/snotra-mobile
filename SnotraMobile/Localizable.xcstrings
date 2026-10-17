@@ -1,6 +1,26 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "Close" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schließen"
+          }
+        }
+      }
+    },
+    "It arrives together with remote access in Snotra on your desktop." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Es kommt zusammen mit dem Fernzugriff in Snotra auf deinem Desktop."
+          }
+        }
+      }
+    },
     "Not paired" : {
       "localizations" : {
         "de" : {
@@ -17,6 +37,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kopple dieses iPhone mit Snotra auf deinem Desktop, um seine Chats zu verfolgen und zu steuern."
+          }
+        }
+      }
+    },
+    "Pair with your desktop" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mit deinem Desktop koppeln"
+          }
+        }
+      }
+    },
+    "Pairing isn't available yet" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Koppeln ist noch nicht verfügbar"
+          }
+        }
+      }
+    },
+    "Start pairing" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kopplung starten"
           }
         }
       }
