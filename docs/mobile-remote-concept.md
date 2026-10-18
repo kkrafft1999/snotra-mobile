@@ -253,11 +253,18 @@ when, is drawn in [`remote-pairing-sequence.svg`](https://github.com/kkrafft1999
 3. **Desktop.** Checks `MAC_P`. A wrong MAC — a relay or a stranger trying to
    slip in its own keys — ends the pairing with an error.
 4. **Both** derive the same six-word safety phrase from both sides' public keys
-   and show it.
+   and show it. The words come from one fixed list that belongs to the protocol
+   (`docs/remote-protocol.md`, with test vectors) and are never translated: a
+   desktop in German and a phone in English show the same six words.
 5. **Desktop, in person.** *"iPhone wants to access Snotra. The phone shows:
    amber · lantern · seven · orbit · velvet · quay. Allow?"* Only this click
    completes the pairing. A photographed QR code is therefore not enough: it
-   needs someone at the desktop to confirm it within five minutes.
+   needs someone at the desktop to confirm it within five minutes. The question
+   is a native sheet on the app window, asked through the confirmation port of
+   [snotra#980](https://github.com/kkrafft1999/snotra/issues/980): *Deny* is the
+   default answer, and neither the renderer nor the phone can answer it.
+   *Settings › Remote access* shows the six words large beside it for comparing
+   ([mockup](https://github.com/kkrafft1999/snotra/blob/main/docs/ui-design/remote-access-mockup.html)).
 6. **Desktop → phone.** With the confirmation the desktop sends `MAC_D`, the
    same HMAC over the label `desktop` and both sides' keys, and the relay sets
    the channel to `paired`. The phone checks `MAC_D` before it keeps the
@@ -463,6 +470,11 @@ Decided on 2026-10-18, with the sequence diagram
 - **Heartbeat for the desktop's presence**, because REST streaming has no
   `onDisconnect`. The Firebase JS SDK in main would have brought it, at the
   price of a large dependency for one flag (§4.2).
+- **The pairing dialog.** It runs inside *Settings › Remote access* — no dialog
+  of its own on top of the settings — and *Allow* is the confirmation port's
+  native sheet, not a button in the window (§5.1, step 5; layout A of the
+  [mockup](https://github.com/kkrafft1999/snotra/blob/main/docs/ui-design/remote-access-mockup.html)).
+- **One word list in every language** for the safety phrase (§5.1, step 4).
 
 Still open:
 
