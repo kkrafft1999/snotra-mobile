@@ -115,6 +115,11 @@ kept inside the project instead:
 - **Its own Functions codebase** (`relay`, next to `default` in `firebase.json`),
   deployed on its own with `firebase deploy --only functions:relay`, so a
   website deploy does not redeploy the relay and the other way round.
+- **A pinned protocol.** snotra-promotion names one commit of Snotra and tests
+  the relay against the protocol's test vectors at that commit. A new protocol
+  version reaches the relay through a pull request there that moves the pin
+  (decided 2026-10-18,
+  [snotra-promotion#165](https://github.com/kkrafft1999/snotra-promotion/issues/165)).
 
 What stays shared is the project's quota and its bill (§10). It also bends the
 rule in
@@ -122,6 +127,8 @@ rule in
 that nothing in Snotra depends on the website: the desktop's remote feature now
 depends on the website's project. That is accepted because the feature is off
 by default (R7) and the desktop is unaffected when the relay is down (§6).
+Snotra's tests do not bend it: the end-to-end test against the relay runs in
+snotra-promotion's CI, and Snotra's own tests use an in-memory relay (§9).
 
 ### 4.1 Desktop: the remote bridge is a second front end
 
@@ -449,8 +456,8 @@ the app fetches the actual card over the channel.
 | ----- | ---- | ----- | ---------- |
 | 0 | Conversation in the core ([snotra#981](https://github.com/kkrafft1999/snotra/issues/981)), confirmation port ([snotra#980](https://github.com/kkrafft1999/snotra/issues/980)), remote interface ADR widened to the relay ([snotra#989](https://github.com/kkrafft1999/snotra/issues/989)) | Snotra | — |
 | 1 | Protocol spec and test vectors; remote bridge with pairing, encryption, presence; desktop UI (*Settings › Remote access*, workspace switch, connection indicator, phone mark on messages) | Snotra | 0 |
-| 2 | Relay: Realtime Database instance, Functions codebase, database rules, clean-up; tested against the Firebase emulator | snotra-promotion | 1 (protocol) |
-| 3 | A small reference client in Node in Snotra's `e2e/` that pairs and chats through the emulator — the desktop's end-to-end test, and the mobile app's reference | Snotra | 1, 2 |
+| 2 | Relay: Realtime Database instance, Functions codebase, database rules, clean-up; tested against the Firebase emulator and the test vectors of a pinned Snotra commit ([snotra-promotion#165](https://github.com/kkrafft1999/snotra-promotion/issues/165)) | snotra-promotion | 1 (protocol) |
+| 3 | A small reference client in Node in Snotra's `e2e/` that pairs and chats through the relay — the desktop's end-to-end test, and the mobile app's reference ([snotra#1135](https://github.com/kkrafft1999/snotra/issues/1135)). It runs in snotra-promotion's CI against the emulator, at the pinned commit; Snotra tests it against a stand-in | Snotra (code), snotra-promotion (run) | 1, 2 |
 | 4 | Mobile app MVP | this repository | 1–3 |
 | 5 | Push notifications, images | all | 4 |
 
@@ -500,6 +507,19 @@ Decided on 2026-10-18, with the sequence diagram
   ([spec §7](https://github.com/kkrafft1999/snotra/blob/main/docs/remote-protocol.md#7-the-safety-phrase); snotra#1116).
 - **A 75-bit pairing secret** in a twenty-symbol code instead of 128 bits
   (§5.1, step 1; [spec §4](https://github.com/kkrafft1999/snotra/blob/main/docs/remote-protocol.md#4-the-pairing-code)).
+
+Decided on 2026-10-18, with
+[snotra-promotion#165](https://github.com/kkrafft1999/snotra-promotion/issues/165)
+(options 1A + 2A there):
+
+- **The relay pins the protocol.** snotra-promotion names one commit of Snotra
+  and tests the relay against the test vectors at that commit; moving the pin
+  is a pull request there (§4).
+- **The end-to-end test runs at the relay.** The reference client is written in
+  Snotra ([snotra#1135](https://github.com/kkrafft1999/snotra/issues/1135)), but
+  snotra-promotion's CI checks Snotra out at the pinned commit and runs it
+  against the emulator. Nothing in Snotra points at the website repository,
+  and Snotra's three test jobs need neither Java nor `firebase-tools` (§9).
 
 Still open:
 
