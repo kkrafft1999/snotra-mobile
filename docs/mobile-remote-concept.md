@@ -10,8 +10,7 @@ the pairing and the channel step by step:
 The bytes — pairing code, the relay's endpoints, `MAC_P`, `MAC_D` and the
 safety phrase, with test vectors — are specified in
 [`remote-protocol.md`](https://github.com/kkrafft1999/snotra/blob/main/docs/remote-protocol.md);
-where it differs from this concept (the size of the pairing secret), its §11
-says so.
+its §11 lists what this concept took over from it on 2026-10-18.
 
 Moved here from `docs/` of the Snotra repository on 2026-10-17; the history of
 the first two versions is in [snotra#1089](https://github.com/kkrafft1999/snotra/pull/1089) and
@@ -199,13 +198,13 @@ What the relay stores:
     desktopKeys     public keys of the desktop (P-256: signing, key agreement)
     phoneKeys       public keys of the phone, empty until claimed
     macP, macD      key confirmations under the pairing secret (§5.1)
-    status          pending until the desktop confirms, then paired
+    status          open → pending (claimed) → paired (confirmed)
     createdAt, lastSeen
 /channels/{channelId}/presence/desktop           lastSeen, a heartbeat
 /channels/{channelId}/presence/phone             online flag, via onDisconnect
 /channels/{channelId}/to-phone/{seq}             { nonce, ciphertext, expiresAt }
 /channels/{channelId}/to-desktop/{seq}           { nonce, ciphertext, expiresAt }
-/pairing/{pairingId}                             one-time, 5 minutes
+/pairing/{pairingId}                             one claim, 5 minutes
 ```
 
 - **Access.** No accounts. A Function mints a Firebase custom token whose claims
@@ -243,12 +242,18 @@ when, is drawn in [`remote-pairing-sequence.svg`](https://github.com/kkrafft1999
    draws a QR code and, beneath it, the same content as a typed key:
 
    ```
-   snotra-pair:v1/<relay>/<pairingId>/<pairingSecret>
-   key: 7KQM-3XWD-P9TA-HV2N-RC6E   (pairing id and secret, Crockford base32)
+   snotra-pair:v1/<relay-host>/0111EP9DZH4QPYT4HWWF
+   key: 0111-EP9D-ZH4Q-PYT4-HWWF
    ```
 
-   The pairing secret is 128 random bits, valid for **five minutes and one
-   use**. It never reaches the relay.
+   Twenty Crockford base32 symbols: a 20-bit pairing id the relay minted, a
+   **75-bit pairing secret** from the desktop's random generator, and a check
+   symbol that lets the phone catch a typo before it asks the relay. The code
+   is valid for **five minutes and one use**; the secret never reaches the
+   relay. 75 bits rather than 128 so that id and secret fit the twenty symbols
+   of the typed key — the secret only has to hold for those five minutes
+   against an offline search ([spec §4](https://github.com/kkrafft1999/snotra/blob/main/docs/remote-protocol.md#4-the-pairing-code), decided
+   2026-10-18). The phone accepts a QR code only for a relay host it ships with.
 2. **Phone.** Scans the code or takes the typed key. It generates its own
    keys in the Secure Enclave and sends the public halves to the pairing
    endpoint, together with `MAC_P`, an HMAC-SHA256 under the pairing secret
@@ -262,7 +267,7 @@ when, is drawn in [`remote-pairing-sequence.svg`](https://github.com/kkrafft1999
    (`docs/remote-protocol.md`, with test vectors) and are never translated: a
    desktop in German and a phone in English show the same six words.
 5. **Desktop, in person.** *"iPhone wants to access Snotra. The phone shows:
-   amber · lantern · seven · orbit · velvet · quay. Allow?"* Only this click
+   coffeecake · groundhog · maestro · kangaroo · ozone · oncoming. Allow?"* Only this click
    completes the pairing. A photographed QR code is therefore not enough: it
    needs someone at the desktop to confirm it within five minutes. The question
    is a native sheet on the app window, asked through the confirmation port of
@@ -404,6 +409,9 @@ Built later, in this repository. What this concept asks of it:
   a workspace, a chat with composer and approval cards, connection state.
 - **Stores nothing but its keys.** No chat in a database, a file or a cache;
   everything is gone when the app is closed.
+- **Names the word list.** The safety phrase uses the EFF short word list 2.0
+  (CC BY 3.0 US); the About screen credits the Electronic Frontier Foundation
+  with a link to the licence, as Snotra's `THIRD_PARTY_NOTICES.md` does.
 - **Bilingual**, English and German, under the rules of
   [`language.md`](https://github.com/kkrafft1999/snotra/blob/main/.claude/rules/language.md).
 - **Same standard** as the desktop under
@@ -479,7 +487,12 @@ Decided on 2026-10-18, with the sequence diagram
   of its own on top of the settings — and *Allow* is the confirmation port's
   native sheet, not a button in the window (§5.1, step 5; layout A of the
   [mockup](https://github.com/kkrafft1999/snotra/blob/main/docs/ui-design/remote-access-mockup.html)).
-- **One word list in every language** for the safety phrase (§5.1, step 4).
+- **One word list in every language** for the safety phrase (§5.1, step 4):
+  the **EFF short word list 2.0**, 1,296 words with a unique three-letter
+  prefix each, in Snotra's `src/shared/contracts/remote/safety-words-v1.json`
+  ([spec §7](https://github.com/kkrafft1999/snotra/blob/main/docs/remote-protocol.md#7-the-safety-phrase); snotra#1116).
+- **A 75-bit pairing secret** in a twenty-symbol code instead of 128 bits
+  (§5.1, step 1; [spec §4](https://github.com/kkrafft1999/snotra/blob/main/docs/remote-protocol.md#4-the-pairing-code)).
 
 Still open:
 
