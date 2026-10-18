@@ -206,27 +206,37 @@ comes from `onDisconnect` of its SDK.
 What the relay stores:
 
 ```
-/channels/{channelId}
+/channels/{channelId}/meta                         written by the Functions only
     desktopKeys     public keys of the desktop (P-256: signing, key agreement)
     phoneKeys       public keys of the phone, empty until claimed
     macP, macD      key confirmations under the pairing secret (§5.1)
     status          open → pending (claimed) → paired (confirmed)
     createdAt, lastSeen
-/channels/{channelId}/presence/desktop           lastSeen, a heartbeat
-/channels/{channelId}/presence/phone             online flag, via onDisconnect
-/channels/{channelId}/to-phone/{seq}             { nonce, ciphertext, expiresAt }
-/channels/{channelId}/to-desktop/{seq}           { nonce, ciphertext, expiresAt }
-/pairing/{pairingId}                             one claim, 5 minutes
+/channels/{channelId}/handshake/phone              the phone's ephemeral key, handshake 1
+/channels/{channelId}/handshake/desktop            the desktop's ephemeral key, handshake 2
+/channels/{channelId}/presence/desktop             { lastSeen }, a heartbeat every 30 s
+/channels/{channelId}/presence/phone               { online, since }, via onDisconnect
+/channels/{channelId}/to-phone/{sid}/{counter}     { c, at }: ciphertext with tag, server time
+/channels/{channelId}/to-desktop/{sid}/{counter}   { c, at }
+/pairing/{pairingId}                               one claim, 5 minutes
 ```
+
+The protocol spec is the authority on this layout
+([`remote-protocol.md`](https://github.com/kkrafft1999/snotra/blob/main/docs/remote-protocol.md)
+§5.10, §12, §13, §15); the concept only sketches it.
 
 - **Access.** No accounts. A Function mints a Firebase custom token whose claims
   name the channel and the role (`desktop` or `phone`), after the caller has
   proved it holds the private key of that role (a signed challenge). The
-  security rules let a token read and write its own channel only, write only
-  into its own outbox, and never read `/pairing` at all.
+  security rules keep a token inside its own channel, let it write only into
+  its own outbox, and never let it read `/pairing`. Read access is granted
+  node by node — `meta` and the four nodes each side follows — never on the
+  channel itself: the database's rules are not filters, and read access on the
+  channel would reach into both outboxes and echo every envelope back to its
+  sender ([snotra#1142](https://github.com/kkrafft1999/snotra/issues/1142)).
 - **Closed until paired.** Between its claim and the click at the desktop the
-  phone already holds a token, so that it can follow the channel's `status`.
-  In that window the rules let it read `status` and `macD` and nothing else;
+  phone already holds a token, so that it can follow the channel's `meta`.
+  In that window the rules let it read `meta` and nothing else;
   both outboxes stay closed until `status` is `paired`, which only the
   confirming Function sets.
 - **Two keys, no third.** Once `phoneKeys` are set, the Function refuses another
