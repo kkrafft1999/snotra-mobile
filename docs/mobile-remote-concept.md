@@ -315,10 +315,17 @@ phone to this workspace — while the phone only has to be scanned once.
   (`P256.Signing`, `SecureEnclave.P256.KeyAgreement`, `Curve25519.KeyAgreement`,
   `HKDF`, `ChaChaPoly`), Node's built-in **`crypto`** in main (`ecdh`/`sign`
   on `prime256v1`, `x25519`, `hkdf`, `chacha20-poly1305`). Both are covered by
-  the shared test vectors of the protocol. Before building, the handshake is
-  checked against the Noise `KK` pattern, which it follows in spirit — if it
-  can be written as Noise with these primitives, it is.
-- **Version.** The first packet names the protocol version; a version the
+  the shared test vectors of the protocol. Checked against the Noise `KK`
+  pattern as planned: it cannot be written as Noise, because `KK`'s mixed
+  agreements need long-term and ephemeral keys on one curve, and the Secure
+  Enclave knows only P-256. The handshake keeps `KK`'s static and ephemeral
+  agreements and gives up resistance to key-compromise impersonation, which
+  only a compromised desktop could exploit ([spec §19](https://github.com/kkrafft1999/snotra/blob/main/docs/remote-protocol.md#19-why-not-noise-kk)).
+- **Specified** in [the protocol spec](https://github.com/kkrafft1999/snotra/blob/main/docs/remote-protocol.md#12-connecting), §12–§18
+  (snotra#1113): the handshake in two records under `/handshake/`, envelopes
+  under `/to-desktop|to-phone/{sid}/{counter}`, `session.hello` as key
+  confirmation, the receiver's order rule, with test vectors.
+- **Version.** Handshake 1 names the versions the phone speaks; a version the
   desktop doesn't speak ends the connection with a message the phone can show.
 
 ### 5.3 Ending it
