@@ -4,7 +4,9 @@ Concept, written on 2026-10-17 ([snotra#1082](https://github.com/kkrafft1999/sno
 [snotra#1081](https://github.com/kkrafft1999/snotra/issues/1081)). Nothing of it is built yet. It settles what
 the desktop app [Snotra Agent](https://github.com/kkrafft1999/snotra), the relay and this iPhone app have to
 agree on before any of them is written, and it is the basis for building the
-app. Diagram: [`mobile-remote-architecture.svg`](./mobile-remote-architecture.svg).
+app. Diagram: [`mobile-remote-architecture.svg`](./mobile-remote-architecture.svg);
+the pairing and the channel step by step:
+[`remote-pairing-sequence.svg`](https://github.com/kkrafft1999/snotra/blob/main/docs/remote-pairing-sequence.svg) in the Snotra repository.
 
 Moved here from `docs/` of the Snotra repository on 2026-10-17; the history of
 the first two versions is in [snotra#1089](https://github.com/kkrafft1999/snotra/pull/1089) and
@@ -17,6 +19,11 @@ and SwiftUI, in this repository,
 and the encryption is built from CryptoKit on the phone and Node's built-in
 `crypto` on the desktop — ChaCha20-Poly1305 instead of XChaCha20, no libsodium
 ([§5.2](#52-the-channel), [§8](#8-the-mobile-app)).
+
+Revised on 2026-10-18 with the sequence diagram ([snotra#1107](https://github.com/kkrafft1999/snotra/issues/1107)): the outboxes stay
+closed until the desktop confirms, the desktop confirms the keys to the phone
+with a MAC of its own, and the desktop's presence is a heartbeat
+([§4.2](#42-relay-firebase-as-a-mailbox-functions-as-the-door), [§5.1](#51-pairing)).
 
 It changes two decisions of [`quality-requirements.md`](https://github.com/kkrafft1999/snotra/blob/main/docs/quality-requirements.md)
 from 2026-10-15 — *no backend of our own* and *remote control over localhost
@@ -167,7 +174,7 @@ Three ways to build it:
 
 | Option | How | Cost of a streaming answer | Fit |
 | ------ | --- | -------------------------- | --- |
-| **A. Realtime Database + Functions** *(recommended)* | Each side writes envelopes into its outbox under `/channels/{id}/` and listens on the other side's. Functions do pairing, tokens and clean-up; `onDisconnect` gives presence for free. | Billed by data volume, not by writes — a delta every 150 ms is cheap | Best: low latency, presence built in, small free tier is enough for one user |
+| **A. Realtime Database + Functions** *(recommended)* | Each side writes envelopes into its outbox under `/channels/{id}/` and listens on the other side's. Functions do pairing, tokens and clean-up; `onDisconnect` gives the phone its presence for free, the desktop keeps a heartbeat. | Billed by data volume, not by writes — a delta every 150 ms is cheap | Best: low latency, presence built in, small free tier is enough for one user |
 | B. Firestore + Functions | Same, with documents and snapshot listeners | Billed per write; a streamed answer is hundreds of writes, the free tier runs out after about an hour of streaming a day | Works, costs more, no presence |
 | C. Cloud Run with WebSockets | A real relay server holding both sockets | Instance time while connected | Most control, but a server to operate and scale, and two instances still need a broker between them |
 
@@ -175,16 +182,22 @@ Three ways to build it:
 Function that opens the channel — without asking a Function to do what it
 can't. The desktop talks to the database over its REST streaming interface
 (server-sent events), so main needs no Firebase SDK; the phone uses the native
-SDK.
+SDK. REST has no `onDisconnect`, so the desktop's presence is a **heartbeat**:
+while it is connected it writes `lastSeen` at a fixed interval, and the phone
+shows the desktop as offline after three missed beats. The phone's presence
+comes from `onDisconnect` of its SDK.
 
 What the relay stores:
 
 ```
 /channels/{channelId}
     desktopKeys     public keys of the desktop (P-256: signing, key agreement)
-    phoneKeys       public keys of the phone, empty until paired
+    phoneKeys       public keys of the phone, empty until claimed
+    macP, macD      key confirmations under the pairing secret (§5.1)
+    status          pending until the desktop confirms, then paired
     createdAt, lastSeen
-/channels/{channelId}/presence/{desktop|phone}   online flag, via onDisconnect
+/channels/{channelId}/presence/desktop           lastSeen, a heartbeat
+/channels/{channelId}/presence/phone             online flag, via onDisconnect
 /channels/{channelId}/to-phone/{seq}             { nonce, ciphertext, expiresAt }
 /channels/{channelId}/to-desktop/{seq}           { nonce, ciphertext, expiresAt }
 /pairing/{pairingId}                             one-time, 5 minutes
@@ -195,6 +208,11 @@ What the relay stores:
   proved it holds the private key of that role (a signed challenge). The
   security rules let a token read and write its own channel only, write only
   into its own outbox, and never read `/pairing` at all.
+- **Closed until paired.** Between its claim and the click at the desktop the
+  phone already holds a token, so that it can follow the channel's `status`.
+  In that window the rules let it read `status` and `macD` and nothing else;
+  both outboxes stay closed until `status` is `paired`, which only the
+  confirming Function sets.
 - **Two keys, no third.** Once `phoneKeys` are set, the Function refuses another
   claim on the channel. A new pairing creates a new channel and deletes the
   old one (R1).
@@ -212,7 +230,8 @@ What the relay can see is listed in [§6](#6-threat-model).
 ### 5.1 Pairing
 
 Pairing joins one phone to one desktop installation. It happens once per
-phone, not once per workspace.
+phone, not once per workspace. Every step, with what the relay stores and
+when, is drawn in [`remote-pairing-sequence.svg`](https://github.com/kkrafft1999/snotra/blob/main/docs/remote-pairing-sequence.svg).
 
 1. **Desktop.** *Settings › Remote access › Pair a phone.* The desktop creates
    a channel on the relay with its public key and receives a pairing id. It
@@ -227,10 +246,11 @@ phone, not once per workspace.
    use**. It never reaches the relay.
 2. **Phone.** Scans the code or takes the typed key. It generates its own
    keys in the Secure Enclave and sends the public halves to the pairing
-   endpoint, together with a MAC (HMAC-SHA256) over its own and the desktop's
-   public keys under the pairing secret. The relay stores them and cannot
-   forge the MAC: it doesn't know the secret.
-3. **Desktop.** Checks the MAC. A wrong MAC — a relay or a stranger trying to
+   endpoint, together with `MAC_P`, an HMAC-SHA256 under the pairing secret
+   over the label `phone`, its own and the desktop's public keys. The relay
+   stores them, refuses any further claim, and cannot forge the MAC: it
+   doesn't know the secret. The channel stays `pending`, its outboxes closed.
+3. **Desktop.** Checks `MAC_P`. A wrong MAC — a relay or a stranger trying to
    slip in its own keys — ends the pairing with an error.
 4. **Both** derive the same six-word safety phrase from both sides' public keys
    and show it.
@@ -238,6 +258,13 @@ phone, not once per workspace.
    amber · lantern · seven · orbit · velvet · quay. Allow?"* Only this click
    completes the pairing. A photographed QR code is therefore not enough: it
    needs someone at the desktop to confirm it within five minutes.
+6. **Desktop → phone.** With the confirmation the desktop sends `MAC_D`, the
+   same HMAC over the label `desktop` and both sides' keys, and the relay sets
+   the channel to `paired`. The phone checks `MAC_D` before it keeps the
+   desktop's keys. Both sides now know from the pairing secret alone that they
+   hold each other's real keys; for the phone, too, the safety phrase is a
+   second, human check and no longer the only one. The labels keep one MAC
+   from being passed off as the other.
 
 From then on the phone authenticates with its key; there is no password to
 lose and no code to reuse.
@@ -297,7 +324,7 @@ operator of the relay — Google, or whoever gets into the Firebase project.
 | ------ | ------------- |
 | The relay, or someone inside the Firebase project, reads chats | End-to-end encryption; the relay never holds a private key or the pairing secret |
 | The relay injects or alters messages | AEAD with counters; a forged packet doesn't authenticate |
-| The relay swaps in its own key during pairing | MAC under the pairing secret, then the safety phrase confirmed at the desktop |
+| The relay swaps in its own key during pairing | `MAC_P`, checked by the desktop, and `MAC_D`, checked by the phone, both under the pairing secret; then the safety phrase confirmed at the desktop |
 | Someone photographs the QR code | One use, five minutes, and the pairing completes only with a click at the desktop |
 | **A second person uses Snotra through the phone** (R1) | One phone per installation; a new pairing removes the old one; the channel admits exactly two keys; pairing needs presence at the desktop |
 | A stolen or lost phone | *Remove phone* at the desktop; the app asks for Face ID / Touch ID / the device code when it opens and after 5 minutes in the background |
@@ -423,6 +450,19 @@ Decided on 2026-10-17:
   is shared, the budget covers the website and the relay together, and reaching
   it raises an alert — it does not stop anything. A hard stop would take the
   website down with the relay, so there is none for now.
+
+Decided on 2026-10-18, with the sequence diagram
+([snotra#1107](https://github.com/kkrafft1999/snotra/issues/1107)):
+
+- **One device stays.** *Settings › Remote access* holds no list of
+  connections; pairing a new phone replaces the paired one (§5.3).
+- **Outboxes closed until paired.** The phone's token between claim and
+  confirmation reads the channel's `status` and nothing else (§4.2).
+- **Key confirmation both ways.** The desktop sends `MAC_D` with its
+  confirmation and the phone checks it (§5.1, step 6).
+- **Heartbeat for the desktop's presence**, because REST streaming has no
+  `onDisconnect`. The Firebase JS SDK in main would have brought it, at the
+  price of a large dependency for one flag (§4.2).
 
 Still open:
 
