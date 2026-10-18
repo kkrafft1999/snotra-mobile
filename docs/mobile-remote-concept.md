@@ -7,6 +7,11 @@ agree on before any of them is written, and it is the basis for building the
 app. Diagram: [`mobile-remote-architecture.svg`](./mobile-remote-architecture.svg);
 the pairing and the channel step by step:
 [`remote-pairing-sequence.svg`](https://github.com/kkrafft1999/snotra/blob/main/docs/remote-pairing-sequence.svg) in the Snotra repository.
+The bytes — pairing code, the relay's endpoints, `MAC_P`, `MAC_D` and the
+safety phrase, with test vectors — are specified in
+[`remote-protocol.md`](https://github.com/kkrafft1999/snotra/blob/main/docs/remote-protocol.md);
+where it differs from this concept (the size of the pairing secret), its §11
+says so.
 
 Moved here from `docs/` of the Snotra repository on 2026-10-17; the history of
 the first two versions is in [snotra#1089](https://github.com/kkrafft1999/snotra/pull/1089) and
