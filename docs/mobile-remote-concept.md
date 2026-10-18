@@ -120,6 +120,11 @@ kept inside the project instead:
   version reaches the relay through a pull request there that moves the pin
   (decided 2026-10-18,
   [snotra-promotion#165](https://github.com/kkrafft1999/snotra-promotion/issues/165)).
+- **A host of its own.** The endpoints live at `relay.snotra-ai.dev`, a Hosting
+  site of its own that rewrites `/v1/**` to the `relay` functions. The host is
+  written into the QR code and into every app that ships, so it must not change
+  with a region or a service name; the website's deploy targets only its own
+  site (decided 2026-10-18, snotra-promotion#165).
 
 What stays shared is the project's quota and its bill (§10). It also bends the
 rule in
@@ -230,9 +235,13 @@ What the relay stores:
 - **Short life.** The receiver deletes an envelope once it has read it; a
   scheduled Function deletes whatever is older than ten minutes, and channels
   nobody has seen for 30 days.
-- **Abuse.** App Check (App Attest) on the pairing endpoint,
-  a rate limit per IP, size limits on envelopes, and a budget alert on the
-  project. None of it protects a chat — encryption does — it protects the bill.
+- **Abuse.** App Check (App Attest) on every call of the phone, enforced in
+  production from the start and checked in the Functions' code — not on the
+  database, where the desktop cannot attest. Debug tokens exist only in the
+  emulator. Further a rate limit per IP, size limits on envelopes, a cap on
+  the number of channels and on the Functions' instances during the test
+  phase, and a budget alert on the project (§10). None of it protects a chat —
+  encryption does — it protects the bill.
 
 What the relay can see is listed in [§6](#6-threat-model).
 
@@ -364,7 +373,7 @@ operator of the relay — Google, or whoever gets into the Firebase project.
 | A prompt injection in a chat reaches the phone | The phone renders Markdown with the same sanitizing rules as the desktop, no remote images, no HTML |
 | Chat content left on the phone | Memory only; the app switcher snapshot is blurred; no content in notifications |
 | The relay is down | The desktop is unaffected — the remote feature is off until it comes back, and the phone says so |
-| Abuse of the relay, a large bill | App Check, rate limits, envelope size limits, TTL clean-up, budget alert |
+| Abuse of the relay, a large bill | App Check, rate limits, envelope size limits, TTL clean-up, a cap on channels and instances, budget alert; before the remote goes public a kill switch for the relay alone ([snotra-promotion#166](https://github.com/kkrafft1999/snotra-promotion/issues/166)) |
 
 **What the relay does see**, and the privacy notice of the app has to say so:
 that a channel exists; when each side is online; the time and size of every
@@ -483,7 +492,9 @@ Decided on 2026-10-17:
   up as a monthly budget of USD 10 on the Firebase project. Because the project
   is shared, the budget covers the website and the relay together, and reaching
   it raises an alert — it does not stop anything. A hard stop would take the
-  website down with the relay, so there is none for now.
+  website down with the relay, so there is none for now. *Amended on
+  2026-10-18:* EUR instead of USD, with early alerts, and a stop for the relay
+  alone before the remote goes public — see below.
 
 Decided on 2026-10-18, with the sequence diagram
 ([snotra#1107](https://github.com/kkrafft1999/snotra/issues/1107)):
@@ -520,6 +531,19 @@ Decided on 2026-10-18, with
   snotra-promotion's CI checks Snotra out at the pinned commit and runs it
   against the emulator. Nothing in Snotra points at the website repository,
   and Snotra's three test jobs need neither Java nor `firebase-tools` (§9).
+- **The relay's host** is `relay.snotra-ai.dev`, a Hosting site of its own
+  (§4).
+- **App Check is enforced from the start**, in the Functions' code and not on
+  the database; debug tokens only in the emulator. The iOS simulator works
+  against the emulator, real devices use App Attest against production (§4.2).
+- **The budget for the test phase** is 10 EUR a month — the billing account
+  bills in EUR — with alerts at 1, 5 and 10 EUR and a forecast alert. Since
+  the expected cost of a few testers is nil, the first euro already counts as
+  a sign of a bug. Hard limits sit inside the relay: a cap on channels
+  (proposal: 25) and on the Functions' instances. Before the remote goes
+  public, a kill switch turns off the relay alone when the budget is reached,
+  leaving the website up
+  ([snotra-promotion#166](https://github.com/kkrafft1999/snotra-promotion/issues/166)).
 
 Still open:
 
