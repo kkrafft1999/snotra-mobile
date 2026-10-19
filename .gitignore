@@ -65,3 +65,6 @@ fastlane/test_output
 .claude/worktrees/
 .claude/settings.local.json
 .DS_Store
+
+# Personal signing settings (Config/Signing.xcconfig)
+Config/Signing.local.xcconfig

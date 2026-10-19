@@ -1,0 +1,8 @@
+// Signing for running the app on a device. The Apple team is personal, so it
+// is set in Signing.local.xcconfig next to this file, which git ignores; copy
+// Signing.local.xcconfig.example to start one. Without it the app still builds
+// for the simulator, and CI builds with CODE_SIGNING_ALLOWED=NO.
+
+CODE_SIGN_STYLE = Automatic
+
+#include? "Signing.local.xcconfig"
