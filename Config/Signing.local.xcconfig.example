@@ -1,0 +1,3 @@
+// Copy to Signing.local.xcconfig and put in your Apple team id
+// (Xcode › Settings › Apple Accounts, or `security find-identity -v -p codesigning`).
+DEVELOPMENT_TEAM = ABCDE12345

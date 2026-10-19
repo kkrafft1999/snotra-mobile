@@ -38,6 +38,17 @@ The same test run is the required check `Tests (iOS simulator)` on every pull
 request ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)); `main`
 accepts nothing that has not passed it.
 
+## Running on an iPhone
+
+Signing is automatic, with the Apple team kept out of the repository:
+
+1. Copy `Config/Signing.local.xcconfig.example` to `Config/Signing.local.xcconfig`
+   (git ignores it) and put in your team id.
+2. Sign in under *Xcode › Settings › Apple Accounts*.
+3. Connect the iPhone, trust the Mac, and turn on *Settings › Privacy & Security
+   › Developer Mode* on the phone.
+4. Pick the iPhone as the run destination and run the `SnotraMobile` scheme.
+
 ## Strings
 
 Every string the user sees goes into `SnotraMobile/Localizable.xcstrings`,
