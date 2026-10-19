@@ -33,7 +33,12 @@ comes.
    [`task-management.md`](./task-management.md)) — in English, a German
    "Schließt #N" closes nothing. Title and body are English.
 4. **Squash-merge** once the checks below pass, with the pull request number in
-   the title. GitHub deletes the head branch on merge (*Automatically delete
+   the title. **Auto-merge is the default** (user decision, 2026-10-19): right
+   after opening a pull request, turn it on with
+   `gh pr merge <nr> --auto --squash --subject "<title> (#<nr>)"`, so GitHub
+   merges as soon as the required check is green. The checks below still
+   apply: if one of them fails before the merge, turn auto-merge off
+   (`gh pr merge <nr> --disable-auto`) and report it. GitHub deletes the head branch on merge (*Automatically delete
    head branches*, `delete_branch_on_merge`, on since 2026-10-17) — check that
    it is gone, don't delete it by hand, and never before the merge: a pull
    request whose head branch disappears is closed unmerged. Then tidy up the
