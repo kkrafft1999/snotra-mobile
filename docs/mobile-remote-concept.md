@@ -467,6 +467,10 @@ Built later, in this repository. What this concept asks of it:
   encryption comes from the platform instead of a third-party binding, and the
   app looks and behaves like an iPhone app. Android is not planned; the
   protocol does not depend on the platform, so it stays possible.
+- **iOS 26 at least** (decided 2026-10-20, #27). Devices that stop at iOS 18,
+  such as the iPhone XS and XR, no longer receive the full security updates,
+  and a phone that drives an agent on the desktop should not be one of them.
+  It also lets the app use the system's newer APIs without a fallback.
 - **Building it needs Xcode** on the Mac (not installed as of 2026-10-17) and
   the Apple Developer Program for TestFlight and the user's own iPhone.
 
