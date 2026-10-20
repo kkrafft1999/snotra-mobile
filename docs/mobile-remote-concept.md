@@ -381,7 +381,9 @@ operator of the relay — Google, or whoever gets into the Firebase project.
 | The phone loosens a protection | Not offered, and refused in the core ([snotra#980](https://github.com/kkrafft1999/snotra/issues/980)); only *allow once* / *deny* |
 | The phone reaches files outside a released workspace | The phone sends ids, never paths; activation only from the release list; the workspace stays the trust boundary of [snotra#68](https://github.com/kkrafft1999/snotra/issues/68) |
 | A prompt injection in a chat reaches the phone | The phone renders Markdown with the same sanitizing rules as the desktop, no remote images, no HTML |
-| Chat content left on the phone | Memory only; the app switcher snapshot is blurred; no content in notifications |
+| Chat content left on the phone | Memory only; a shield covers the app while it is not active, so the app switcher snapshot shows nothing; no content in notifications; Keychain entries are `…ThisDeviceOnly` (§8) |
+| Chat content leaving the phone through the screen | The same shield covers the app while the screen is recorded, mirrored or shared ([#27](https://github.com/kkrafft1999/snotra-mobile/issues/27)); a screenshot cannot be prevented |
+| A keyboard sends what is typed to its maker | Third-party keyboards are refused app-wide; only the system keyboard and dictation remain (#27) |
 | The relay is down | The desktop is unaffected — the remote feature is off until it comes back, and the phone says so |
 | Abuse of the relay, a large bill | App Check, rate limits, envelope size limits, TTL clean-up, a cap on channels and instances, budget alert; before the remote goes public a kill switch for the relay alone ([snotra-promotion#166](https://github.com/kkrafft1999/snotra-promotion/issues/166)) |
 
@@ -442,6 +444,11 @@ Built later, in this repository. What this concept asks of it:
   a workspace, a chat with composer and approval cards, connection state.
 - **Stores nothing but its keys.** No chat in a database, a file or a cache;
   everything is gone when the app is closed.
+- **Keychain on this device only** (#27). Everything the app keeps in the
+  Keychain — the desktop's public keys, the channel id, the references to its
+  Secure Enclave keys — uses `kSecAttrAccessibleWhenUnlockedThisDeviceOnly`:
+  never in iCloud Keychain, never in a backup, unreadable while the phone is
+  locked. The Secure Enclave keys are bound to the device by nature.
 - **Names the word list.** The safety phrase uses the EFF short word list 2.0
   (CC BY 3.0 US); the About screen credits the Electronic Frontier Foundation
   with a link to the licence, as Snotra's `THIRD_PARTY_NOTICES.md` does.
@@ -460,6 +467,10 @@ Built later, in this repository. What this concept asks of it:
   encryption comes from the platform instead of a third-party binding, and the
   app looks and behaves like an iPhone app. Android is not planned; the
   protocol does not depend on the platform, so it stays possible.
+- **iOS 26 at least** (decided 2026-10-20, #27). Devices that stop at iOS 18,
+  such as the iPhone XS and XR, no longer receive the full security updates,
+  and a phone that drives an agent on the desktop should not be one of them.
+  It also lets the app use the system's newer APIs without a fallback.
 - **Building it needs Xcode** on the Mac (not installed as of 2026-10-17) and
   the Apple Developer Program for TestFlight and the user's own iPhone.
 
