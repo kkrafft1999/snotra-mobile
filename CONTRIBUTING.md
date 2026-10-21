@@ -49,6 +49,22 @@ Signing is automatic, with the Apple team kept out of the repository:
    › Developer Mode* on the phone.
 4. Pick the iPhone as the run destination and run the `SnotraMobile` scheme.
 
+## TestFlight
+
+For a phone that cannot turn on Developer Mode (one managed by an MDM, for
+example), the app goes out through TestFlight. The App Store Connect record
+exists (bundle id `dev.snotra-ai.mobile`); the build is signed at export with
+the team from `Config/Signing.local.xcconfig`, so no registered device is
+needed.
+
+1. Raise `CURRENT_PROJECT_VERSION` in the project — App Store Connect takes each
+   build number once.
+2. Run `scripts/testflight.sh --upload`. Without `--upload` it only builds and
+   exports into `build/testflight/` (ignored by git).
+3. Once App Store Connect has processed the build, answer the export-compliance
+   question for it under *TestFlight*, then install it with the TestFlight app on
+   the iPhone of an internal tester.
+
 ## Strings
 
 Every string the user sees goes into `SnotraMobile/Localizable.xcstrings`,
