@@ -68,3 +68,6 @@ fastlane/test_output
 
 # Personal signing settings (Config/Signing.xcconfig)
 Config/Signing.local.xcconfig
+
+# Archives and exports from scripts/testflight.sh
+build/
