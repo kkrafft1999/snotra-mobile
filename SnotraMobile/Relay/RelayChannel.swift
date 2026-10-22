@@ -160,52 +160,35 @@ actor RelayChannel {
     /// stream has failed `streamAttempts` times in a row.
     private func follow(_ node: String) async throws {
         var failures = 0
-        var tree = JSONValue.null
         while true {
             try Task.checkCancellation()
             if failures >= timing.streamAttempts { throw RelayError.unreachable }
             if failures > 0 { try await Task.sleep(for: timing.streamRetry) }
             let used = try await currentToken()
-            var request = URLRequest(url: client.endpoint.databaseNodeURL(channelId: channelId, node: node, idToken: used))
-            request.setValue("text/event-stream", forHTTPHeaderField: "Accept")
             do {
-                let (response, body) = try await client.transport.stream(request)
-                switch response.statusCode {
-                case 200: break
-                case 401:
-                    _ = try await renew(after: used)
-                    failures += 1
-                    continue
-                default:
-                    throw RelayError(status: response.statusCode, reason: nil)
-                }
-                var parser = EventStreamParser(
+                let events = try await client.openNode(
+                    channelId: channelId, node: node, idToken: used,
                     maxEventBytes: node == "to-phone" ? Self.inboxMaxEventBytes : EventStreamParser.defaultMaxEventBytes)
-                streaming: for try await byte in body {
-                    guard let event = try parser.feed(byte) else { continue }
-                    switch event.type {
-                    case "put", "patch":
+                streaming: for try await event in events {
+                    switch event {
+                    case .tree(let tree):
                         // A stream counts as a good connection once it delivers; one that opens and closes does not.
                         failures = 0
-                        guard let change = try? JSONValue(data: Data(event.data.utf8)),
-                              let path = change["path"]?.stringValue
-                        // An event that is no JSON changes nothing; the next full put repairs the copy.
-                        else { continue }
-                        tree = tree.applying(change["data"] ?? .null, at: path, merge: event.type == "patch")
                         try received(tree, at: node)
-                    case "cancel":
-                        // The rules took the read away: the channel went, or its status left `paired`.
+                    case .keepAlive:
+                        failures = 0
+                    case .cancelled:
                         if node == "meta" { throw Ended() }
                         break streaming
-                    case "auth_revoked":
+                    case .authRevoked:
                         _ = try await renew(after: used)
                         break streaming
-                    default:
-                        // keep-alive
-                        failures = 0
                     }
                 }
                 // The stream ended; open it again.
+                failures += 1
+            } catch RelayError.unauthorized {
+                _ = try await renew(after: used)
                 failures += 1
             } catch let error as RelayError where error.isTransient || error == .invalidResponse {
                 failures += 1
