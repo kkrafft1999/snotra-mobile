@@ -18,7 +18,7 @@ The concept, which is the basis for building the app, is [`docs/mobile-remote-co
 - Swift and SwiftUI, iPhone first
 - CryptoKit for the end-to-end encryption, the Secure Enclave and the Keychain for the keys
 - VisionKit for the QR scan, LocalAuthentication for Face ID
-- The Firebase iOS SDK (Realtime Database) as the transport
+- The relay's Realtime Database over REST and server-sent events, without the Firebase SDK
 
 ## License
 

@@ -190,18 +190,19 @@ Three ways to build it:
 
 | Option | How | Cost of a streaming answer | Fit |
 | ------ | --- | -------------------------- | --- |
-| **A. Realtime Database + Functions** *(recommended)* | Each side writes envelopes into its outbox under `/channels/{id}/` and listens on the other side's. Functions do pairing, tokens and clean-up; `onDisconnect` gives the phone its presence for free, the desktop keeps a heartbeat. | Billed by data volume, not by writes — a delta every 150 ms is cheap | Best: low latency, presence built in, small free tier is enough for one user |
+| **A. Realtime Database + Functions** *(recommended)* | Each side writes envelopes into its outbox under `/channels/{id}/` and listens on the other side's. Functions do pairing, tokens and clean-up; both sides keep a heartbeat for their presence. | Billed by data volume, not by writes — a delta every 150 ms is cheap | Best: low latency, presence built in, small free tier is enough for one user |
 | B. Firestore + Functions | Same, with documents and snapshot listeners | Billed per write; a streamed answer is hundreds of writes, the free tier runs out after about an hour of streaming a day | Works, costs more, no presence |
 | C. Cloud Run with WebSockets | A real relay server holding both sockets | Instance time while connected | Most control, but a server to operate and scale, and two instances still need a broker between them |
 
 **Recommendation: A.** It is the closest to what was asked for — Firebase, a
 Function that opens the channel — without asking a Function to do what it
 can't. The desktop talks to the database over its REST streaming interface
-(server-sent events), so main needs no Firebase SDK; the phone uses the native
-SDK. REST has no `onDisconnect`, so the desktop's presence is a **heartbeat**:
-while it is connected it writes `lastSeen` at a fixed interval, and the phone
-shows the desktop as offline after three missed beats. The phone's presence
-comes from `onDisconnect` of its SDK.
+(server-sent events), so main needs no Firebase SDK — and neither does the
+phone, which talks to it the same way (decided 2026-10-22, #33; see §10).
+REST has no `onDisconnect`, so each side's presence is a **heartbeat**: while
+it is connected it writes `lastSeen` at a fixed interval, and the other side
+shows it as offline after three missed beats
+([snotra#1227](https://github.com/kkrafft1999/snotra/issues/1227)).
 
 What the relay stores:
 
@@ -215,7 +216,7 @@ What the relay stores:
 /channels/{channelId}/handshake/phone              the phone's ephemeral key, handshake 1
 /channels/{channelId}/handshake/desktop            the desktop's ephemeral key, handshake 2
 /channels/{channelId}/presence/desktop             { lastSeen }, a heartbeat every 30 s
-/channels/{channelId}/presence/phone               { online, since }, via onDisconnect
+/channels/{channelId}/presence/phone               { lastSeen }, a heartbeat every 30 s
 /channels/{channelId}/to-phone/{sid}/{counter}     { c, at }: ciphertext with tag, server time
 /channels/{channelId}/to-desktop/{sid}/{counter}   { c, at }
 /pairing/{pairingId}                               one claim, 5 minutes
@@ -461,7 +462,7 @@ Built later, in this repository. What this concept asks of it:
 - **Platform: iPhone, native** (decided 2026-10-17). Swift and SwiftUI, with
   what the system brings: CryptoKit and the Secure Enclave for the keys,
   VisionKit (`DataScannerViewController`) for the QR scan, LocalAuthentication
-  for Face ID, the Firebase iOS SDK for the Realtime Database. React Native
+  for Face ID, URLSession for the relay and its Realtime Database. React Native
   with Expo was the alternative — one language with the desktop and Android
   almost for free — and lost on the two things the concept rests on: the
   encryption comes from the platform instead of a third-party binding, and the
@@ -565,6 +566,18 @@ Decided on 2026-10-18, with
   public, a kill switch turns off the relay alone when the budget is reached,
   leaving the website up
   ([snotra-promotion#166](https://github.com/kkrafft1999/snotra-promotion/issues/166)).
+
+Decided on 2026-10-22, with #33:
+
+- **No Firebase SDK on the phone either.** The app reaches the relay like the
+  desktop: the endpoints over HTTPS, custom token → ID token through the
+  Identity Toolkit, the database by REST and server-sent events. Firebase Auth
+  on iOS keeps its signed-in user in the Keychain and has no in-memory mode,
+  which would break "refresh tokens in memory only" (spec §12) and an app that
+  keeps nothing but its keys. The price is `onDisconnect`: the phone's
+  presence becomes a heartbeat like the desktop's
+  ([snotra#1227](https://github.com/kkrafft1999/snotra/issues/1227)), and the
+  app brings its own stream reader instead of the SDK's.
 
 Still open:
 
