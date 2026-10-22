@@ -25,6 +25,7 @@ final class FakeRelay: RelayTransport, @unchecked Sendable {
     let phoneKey = P256.Signing.PrivateKey()
     let channelId = Data(repeating: 7, count: 16)
     let endpoint = RelayEndpoint(
+        host: "relay.test",
         relayURL: URL(string: "http://relay.test/v1")!,
         databaseURL: URL(string: "http://db.test/?ns=relay")!,
         identityToolkitURL: URL(string: "http://idp.test/v1")!,
@@ -38,6 +39,8 @@ final class FakeRelay: RelayTransport, @unchecked Sendable {
     var streams: [String: Stream] = [:]
     /// Each further stream of a node after the first, when it differs.
     var laterStreams: [String: Stream] = [:]
+    /// Decides a node's stream when it is opened, after the requests before it — wins over the scripts above.
+    var streamFor: (@Sendable (String) -> Stream?)?
     private var opened: [String: Int] = [:]
 
     var requests: [URLRequest] { lock.withLock { _requests } }
@@ -74,13 +77,15 @@ final class FakeRelay: RelayTransport, @unchecked Sendable {
     }
 
     func stream(_ request: URLRequest) async throws -> (HTTPURLResponse, AsyncThrowingStream<UInt8, any Error>) {
-        let script: Stream = lock.withLock {
+        let node = Self.node(of: request.url!)
+        let (scripted, provider): (Stream, (@Sendable (String) -> Stream?)?) = lock.withLock {
             _requests.append(request)
-            let node = Self.node(of: request.url!)
             let count = opened[node, default: 0]
             opened[node] = count + 1
-            return (count > 0 ? laterStreams[node] : nil) ?? streams[node] ?? Stream()
+            return ((count > 0 ? laterStreams[node] : nil) ?? streams[node] ?? Stream(), streamFor)
         }
+        // Outside the lock: the provider may look at the requests.
+        let script = provider?(node) ?? scripted
         if lock.withLock({ unreachable }) { throw RelayError.unreachable }
         let body = AsyncThrowingStream<UInt8, any Error> { continuation in
             for byte in script.text.utf8 { continuation.yield(byte) }
