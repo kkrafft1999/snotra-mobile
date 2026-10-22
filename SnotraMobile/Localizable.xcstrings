@@ -1,12 +1,102 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "Camera" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kamera"
+          }
+        }
+      }
+    },
+    "Can't reach the relay" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Relay ist nicht erreichbar"
+          }
+        }
+      }
+    },
+    "Check that Snotra on your desktop shows the same six words, then choose Allow there." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prüfe, ob Snotra auf deinem Desktop dieselben sechs Wörter zeigt, und wähle dort „Erlauben“."
+          }
+        }
+      }
+    },
+    "Check your internet connection and try again." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prüfe deine Internetverbindung und versuch es noch einmal."
+          }
+        }
+      }
+    },
     "Close" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Schließen"
+          }
+        }
+      }
+    },
+    "Compare it with the key on your desktop — a symbol may be missing or mistyped." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vergleiche ihn mit dem Schlüssel auf deinem Desktop – vielleicht fehlt ein Zeichen oder ist vertippt."
+          }
+        }
+      }
+    },
+    "Compare the words" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vergleiche die Wörter"
+          }
+        }
+      }
+    },
+    "Connecting to your desktop…" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verbinde mit deinem Desktop …"
+          }
+        }
+      }
+    },
+    "Done" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fertig"
+          }
+        }
+      }
+    },
+    "Following and driving chats arrives in a later version." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chats verfolgen und steuern kommt in einer späteren Version."
           }
         }
       }
@@ -31,12 +121,52 @@
         }
       }
     },
+    "Key" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schlüssel"
+          }
+        }
+      }
+    },
+    "Not allowed on the desktop" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auf dem Desktop nicht erlaubt"
+          }
+        }
+      }
+    },
     "Not paired" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nicht gekoppelt"
+          }
+        }
+      }
+    },
+    "Or type the key" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oder gib den Schlüssel ein"
+          }
+        }
+      }
+    },
+    "Pair" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Koppeln"
           }
         }
       }
@@ -61,12 +191,62 @@
         }
       }
     },
+    "Paired" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gekoppelt"
+          }
+        }
+      }
+    },
+    "Paired with your desktop" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mit deinem Desktop gekoppelt"
+          }
+        }
+      }
+    },
+    "Pairing failed" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Koppeln fehlgeschlagen"
+          }
+        }
+      }
+    },
     "Pairing isn't available yet" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Koppeln ist noch nicht verfügbar"
+          }
+        }
+      }
+    },
+    "Point the camera at the code Snotra shows on your desktop." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Richte die Kamera auf den Code, den Snotra auf deinem Desktop zeigt."
+          }
+        }
+      }
+    },
+    "Scan the code in Settings › Remote access in Snotra on your desktop." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scanne den Code unter Einstellungen › Fernzugriff in Snotra auf deinem Desktop."
           }
         }
       }
@@ -87,6 +267,166 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kopplung starten"
+          }
+        }
+      }
+    },
+    "Start pairing again on your desktop to get a new code." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Starte das Koppeln auf deinem Desktop neu, um einen neuen Code zu bekommen."
+          }
+        }
+      }
+    },
+    "That isn't a Snotra pairing code" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das ist kein Kopplungscode von Snotra"
+          }
+        }
+      }
+    },
+    "That key isn't right" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Schlüssel stimmt nicht"
+          }
+        }
+      }
+    },
+    "The app only pairs through Snotra's own relay." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die App koppelt nur über Snotras eigenes Relay."
+          }
+        }
+      }
+    },
+    "The code has expired or was already used" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Code ist abgelaufen oder wurde schon benutzt"
+          }
+        }
+      }
+    },
+    "The pairing was denied or cancelled on your desktop." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Koppeln wurde auf deinem Desktop abgelehnt oder abgebrochen."
+          }
+        }
+      }
+    },
+    "This code needs a newer version of the app" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Für diesen Code brauchst du eine neuere Version der App"
+          }
+        }
+      }
+    },
+    "This code points to an unknown relay" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dieser Code verweist auf ein unbekanntes Relay"
+          }
+        }
+      }
+    },
+    "This iPhone couldn't keep its keys" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dieses iPhone konnte seine Schlüssel nicht speichern"
+          }
+        }
+      }
+    },
+    "This iPhone is now paired with Snotra on your desktop." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dieses iPhone ist jetzt mit Snotra auf deinem Desktop gekoppelt."
+          }
+        }
+      }
+    },
+    "Try again" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erneut versuchen"
+          }
+        }
+      }
+    },
+    "Try again. If it keeps failing, restart the iPhone." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versuch es noch einmal. Wenn es weiter fehlschlägt, starte das iPhone neu."
+          }
+        }
+      }
+    },
+    "Type the key" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gib den Schlüssel ein"
+          }
+        }
+      }
+    },
+    "Update the app from the App Store or TestFlight, then scan the code again." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktualisiere die App über den App Store oder TestFlight und scanne den Code dann noch einmal."
+          }
+        }
+      }
+    },
+    "Waiting for your desktop…" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Warte auf deinen Desktop …"
+          }
+        }
+      }
+    },
+    "Your desktop's keys could not be verified, so nothing was kept. Start again on your desktop." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Schlüssel deines Desktops ließen sich nicht prüfen, deshalb wurde nichts gespeichert. Starte noch einmal auf deinem Desktop."
           }
         }
       }
