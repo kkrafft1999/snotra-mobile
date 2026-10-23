@@ -71,6 +71,16 @@
         }
       }
     },
+    "About Snotra" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Über Snotra"
+          }
+        }
+      }
+    },
     "Allow %@ once on your desktop" : {
       "localizations" : {
         "de" : {
@@ -497,6 +507,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Schlüssel"
+          }
+        }
+      }
+    },
+    "Licence: CC BY 3.0 US" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lizenz: CC BY 3.0 US"
           }
         }
       }
@@ -1141,6 +1161,16 @@
         }
       }
     },
+    "The words you compare when pairing come from the EFF short word list 2.0, © 2016 Electronic Frontier Foundation, licensed under Creative Commons Attribution 3.0 United States (CC BY 3.0 US). The dice numbers were dropped; order and spelling are as published." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Wörter, die du beim Koppeln vergleichst, stammen aus der EFF Short Word List 2.0, © 2016 Electronic Frontier Foundation, lizenziert unter Creative Commons Namensnennung 3.0 Vereinigte Staaten (CC BY 3.0 US). Die Würfelzahlen wurden entfernt; Reihenfolge und Schreibweise sind wie veröffentlicht."
+          }
+        }
+      }
+    },
     "This app speaks a newer version of the connection than Snotra on your desktop. Update Snotra there, then try again." : {
       "localizations" : {
         "de" : {
@@ -1311,6 +1341,16 @@
         }
       }
     },
+    "Version" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Version"
+          }
+        }
+      }
+    },
     "Wait until the answer is done or stop it, then write again." : {
       "localizations" : {
         "de" : {
@@ -1347,6 +1387,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Warte auf deinen Desktop …"
+          }
+        }
+      }
+    },
+    "Word list" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wortliste"
+          }
+        }
+      }
+    },
+    "Word list at the EFF" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wortliste bei der EFF"
           }
         }
       }
