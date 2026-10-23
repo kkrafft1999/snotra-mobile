@@ -59,8 +59,7 @@ struct RelayClient: Sendable {
     /// §5.1: the relay's custom token becomes an ID token through the Identity Toolkit.
     func signIn(customToken: String, serverDate: Date? = nil) async throws -> Session {
         guard !customToken.isEmpty, customToken.count <= Self.maxTokenChars else { throw RelayError.invalidResponse }
-        var url = endpoint.identityToolkitURL.appending(path: "accounts:signInWithCustomToken")
-        url.append(queryItems: [URLQueryItem(name: "key", value: endpoint.apiKey)])
+        let url = endpoint.accountsURL("signInWithCustomToken")
         let started = now()
         let (answer, _) = try await call(url, body: .object([
             "token": .string(customToken),

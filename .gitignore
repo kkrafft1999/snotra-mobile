@@ -69,5 +69,8 @@ fastlane/test_output
 # Personal signing settings (Config/Signing.xcconfig)
 Config/Signing.local.xcconfig
 
+# The production relay's configuration, written by scripts/testflight.sh
+SnotraMobile/Relay/ProductionRelay.local.swift
+
 # Archives and exports from scripts/testflight.sh
 build/

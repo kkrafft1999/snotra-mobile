@@ -59,9 +59,17 @@ needed.
 
 1. Raise `CURRENT_PROJECT_VERSION` in the project — App Store Connect takes each
    build number once.
-2. Run `scripts/testflight.sh --upload`. Without `--upload` it only builds and
+2. Put the production relay's configuration in a file outside the repository,
+   by default `~/env/snotra-mobile/relay.env` (another path through
+   `SNOTRA_RELAY_ENV`), shaped like `Config/relay.env.example` and readable by
+   you alone (`chmod 600`). Environment variables of the same names take
+   precedence. The script writes the values into
+   `SnotraMobile/Relay/ProductionRelay.local.swift`, which git ignores; a release
+   build does not compile without it, so an archive from Xcode needs one run of
+   the script first.
+3. Run `scripts/testflight.sh --upload`. Without `--upload` it only builds and
    exports into `build/testflight/` (ignored by git).
-3. Once App Store Connect has processed the build, answer the export-compliance
+4. Once App Store Connect has processed the build, answer the export-compliance
    question for it under *TestFlight*, then install it with the TestFlight app on
    the iPhone of an internal tester.
 
