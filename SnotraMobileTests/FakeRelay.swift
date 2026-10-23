@@ -124,8 +124,12 @@ final class EventLog: @unchecked Sendable {
         events.compactMap { if case .state(let state) = $0 { state } else { nil } }
     }
 
+    /// Generous, because it only bounds a wait that ends as soon as the event is
+    /// there: a CI simulator can stall for seconds.
+    static let patience: Double = 15
+
     /// Whether an event that matches shows up within the time.
-    func waitFor(within seconds: Double = 2, _ matches: (RelayChannel.Event) -> Bool) async -> Bool {
+    func waitFor(within seconds: Double = patience, _ matches: (RelayChannel.Event) -> Bool) async -> Bool {
         let deadline = Date().addingTimeInterval(seconds)
         while Date() < deadline {
             if events.contains(where: matches) { return true }
@@ -134,7 +138,7 @@ final class EventLog: @unchecked Sendable {
         return false
     }
 
-    func waitFor(_ state: RelayConnectionState, within seconds: Double = 2) async -> Bool {
+    func waitFor(_ state: RelayConnectionState, within seconds: Double = patience) async -> Bool {
         await waitFor(within: seconds) { $0 == .state(state) }
     }
 }

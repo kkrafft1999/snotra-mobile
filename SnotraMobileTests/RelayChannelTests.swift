@@ -48,7 +48,7 @@ struct RelayChannelTests {
 
     @Test func theDesktopGoesOfflineWhenItsHeartbeatAges() async throws {
         var timing = fast
-        timing.desktopTimeout = 1
+        timing.desktopTimeout = 3
         relay.streams["meta"] = .init(text: meta)
         // Stamped when the stream opens, not when the test starts: a slow runner must not age it first.
         relay.streamFor = { node in
@@ -58,8 +58,8 @@ struct RelayChannelTests {
         let channel = RelayChannel(client: relay.client, channelId: relay.channelId, timing: timing, sign: relay.sign)
         let log = EventLog(channel)
         await channel.start()
-        #expect(await log.waitFor(.connected(desktopOnline: true), within: 5))
-        #expect(await log.waitFor(.connected(desktopOnline: false), within: 5))
+        #expect(await log.waitFor(.connected(desktopOnline: true)))
+        #expect(await log.waitFor(.connected(desktopOnline: false)))
         await channel.stop()
     }
 

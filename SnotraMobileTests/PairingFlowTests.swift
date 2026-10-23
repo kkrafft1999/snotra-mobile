@@ -58,7 +58,8 @@ struct PairingFlowTests {
     }
 
     func waitFor(_ matches: (PairingFlow.Step) -> Bool) async -> Bool {
-        for _ in 0..<200 {
+        let deadline = Date().addingTimeInterval(EventLog.patience)
+        while Date() < deadline {
             if matches(flow.step) { return true }
             try? await Task.sleep(for: .milliseconds(10))
         }
