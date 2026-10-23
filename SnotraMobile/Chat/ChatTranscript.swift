@@ -88,14 +88,17 @@ struct ChatTranscript: Equatable, Sendable {
     /// The id to ask `chat.more` with, while older messages exist.
     var before: String?
     var live: LiveTurn?
+    /// The approval cards of the turn running now, open or settled, in the order they came.
+    var approvals: [ApprovalCard]
 
     init(chatId: String, title: String = "", state: DesktopMirror.ChatState = .idle,
-         messages: [ChatMessage] = [], before: String? = nil) {
+         messages: [ChatMessage] = [], before: String? = nil, approvals: [ApprovalRequest] = []) {
         self.chatId = chatId
         self.title = title
         self.state = state
         self.messages = messages
         self.before = before
+        self.approvals = approvals.map { ApprovalCard(request: $0) }
     }
 
     /// `chat.open`'s result.
@@ -106,11 +109,17 @@ struct ChatTranscript: Equatable, Sendable {
             let state: String?
             let messages: [ChatMessage]
             let before: String?
+            let pendingApprovals: [ApprovalRequest]?
         }
         let opened = try opened.decoded(as: Opened.self)
         self.init(chatId: opened.chatId, title: opened.title ?? "",
                   state: opened.state.flatMap(DesktopMirror.ChatState.init(rawValue:)) ?? .idle,
-                  messages: opened.messages, before: opened.before)
+                  messages: opened.messages, before: opened.before, approvals: opened.pendingApprovals ?? [])
+    }
+
+    /// The cards that still wait for an answer.
+    var openApprovals: [ApprovalRequest] {
+        approvals.filter(\.isOpen).map(\.request)
     }
 
     var isRunning: Bool {
@@ -129,6 +138,7 @@ struct ChatTranscript: Equatable, Sendable {
         if !snapshot.title.isEmpty { title = snapshot.title }
         state = snapshot.state
         before = snapshot.before
+        reloadApprovals(snapshot)
         let stored = messages.filter { !$0.messageId.hasPrefix("live-") }.count
         guard !hasProvisionalAnswer || snapshot.messages.count > stored else { return }
         messages = snapshot.messages
@@ -140,6 +150,31 @@ struct ChatTranscript: Equatable, Sendable {
         let known = Set(messages.map(\.messageId))
         messages.insert(contentsOf: page.filter { !known.contains($0.messageId) }, at: 0)
         self.before = before
+    }
+
+    /// The desktop's open cards are the truth. A card the phone still held open
+    /// that is gone there was settled while the phone was not listening; once
+    /// the turn is over, the notes go with it.
+    private mutating func reloadApprovals(_ snapshot: ChatTranscript) {
+        let open = Set(snapshot.approvals.map(\.id))
+        var cards = snapshot.state == .idle ? [] : approvals.compactMap { card -> ApprovalCard? in
+            guard !open.contains(card.id) else { return nil }
+            guard card.isOpen else { return card }
+            return ApprovalCard(request: card.request, outcome: ApprovalOutcome(kind: .closed, by: nil))
+        }
+        cards.append(contentsOf: snapshot.approvals)
+        approvals = cards
+    }
+
+    /// The phone's own answer, accepted by the desktop.
+    mutating func answered(_ requestId: String, _ kind: ApprovalOutcome.Kind) {
+        guard let index = approvals.firstIndex(where: { $0.id == requestId && $0.isOpen }) else { return }
+        approvals[index].outcome = ApprovalOutcome(kind: kind, by: .thisPhone)
+        waitingSettled()
+    }
+
+    private mutating func waitingSettled() {
+        if state == .needsApproval && openApprovals.isEmpty { state = .running }
     }
 
     /// The phone's own question, shown at once (the desktop sends `chat.message` to everyone else).
@@ -187,6 +222,19 @@ struct ChatTranscript: Equatable, Sendable {
             if !messages.contains(where: { $0.messageId == message.messageId }) { messages.append(message) }
         case "chat.updated":
             if let title = params["title"]?.stringValue { self.title = title }
+        case "approval.request":
+            guard let request = try? params.decoded(as: ApprovalRequest.self), request.chatId == chatId else { return false }
+            if let index = approvals.firstIndex(where: { $0.id == request.requestId }) {
+                if approvals[index].isOpen { approvals[index] = ApprovalCard(request: request) }
+            } else {
+                approvals.append(ApprovalCard(request: request))
+            }
+            state = .needsApproval
+        case "approval.resolved":
+            guard let requestId = params["requestId"]?.stringValue,
+                  let index = approvals.firstIndex(where: { $0.id == requestId }), approvals[index].isOpen else { return false }
+            approvals[index].outcome = ApprovalOutcome(resolved: params)
+            waitingSettled()
         default:
             break
         }

@@ -74,6 +74,8 @@ final class DesktopMirror {
 
     typealias Call = @MainActor (String, JSONValue) async throws(RemoteCallError) -> JSONValue
     private let call: Call
+    /// Who confirms an answer that lets the agent act; the chats opened from here on ask it.
+    @ObservationIgnored var presence: any UserPresence = DeviceOwnerPresence()
 
     init(call: @escaping Call) {
         self.call = call
@@ -102,7 +104,8 @@ final class DesktopMirror {
     /// A chat for its screen; it hears its events while attached.
     func chat(_ route: ChatRoute) -> ChatModel {
         openChats[route.chatId]
-            ?? ChatModel(chatId: route.chatId, workspaceId: route.workspaceId, title: route.title, isNew: route.isNew, call: call)
+            ?? ChatModel(chatId: route.chatId, workspaceId: route.workspaceId, title: route.title, isNew: route.isNew,
+                         presence: presence, call: call)
     }
 
     /// `chat.new` in the workspace open at the desktop. Nothing exists there until the first question.
@@ -201,7 +204,7 @@ final class DesktopMirror {
         default:
             break
         }
-        if method.hasPrefix("chat."), let chatId = params["chatId"]?.stringValue, let chat = openChats[chatId] {
+        if method.hasPrefix("chat.") || method.hasPrefix("approval."), let chatId = params["chatId"]?.stringValue, let chat = openChats[chatId] {
             chat.apply(method, params)
         }
         switch method {
