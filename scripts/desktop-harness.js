@@ -3,7 +3,8 @@
 // The desktop's real channel (remote-channel.js) and dispatcher
 // (remote-dispatcher.js) from a Snotra checkout, behind the relay stand-in,
 // with a fake desktop port: three known folders, two of them opened to the
-// phone. Opens one pairing, writes the relay config and the typed key to a
+// phone, and turns that stream a canned answer (a message with "slowly" in it
+// streams long enough to be stopped). Opens one pairing, writes the relay config and the typed key to a
 // fixture file, confirms the phone's claim once MAC_P verifies, then serves
 // the channel until the phone unpairs. Node 24, nothing to install.
 //
@@ -29,32 +30,83 @@ const { translateMessage } = req('src/shared/i18n');
 
 const SNOTRA = '/work/snotra', WEBSITE = '/work/website', SECRET = '/work/secret';
 const now = Date.now();
-const desktopState = { active: SNOTRA, running: new Set(), listeners: new Set() };
+const desktopState = { active: SNOTRA, running: new Set(), listeners: new Set(), turns: new Map() };
+const chat = (chatId, root, title, ago, count) => ({
+  chatId, root, title, updatedAt: now - ago,
+  messages: Array.from({ length: count }, (_, i) => ({ role: i % 2 ? 'assistant' : 'user', content: i % 2 ? `Answer ${i}` : `Question ${i}` })),
+});
 const CHATS = [
-  { chatId: 'c1', root: SNOTRA, title: 'Release notes for 1.4', updatedAt: now - 60_000, messageCount: 12 },
-  { chatId: 'c2', root: SNOTRA, title: 'Why does the sandbox refuse git push?', updatedAt: now - 3_600_000, messageCount: 4 },
-  { chatId: 'c3', root: WEBSITE, title: 'Tidy up the landing page', updatedAt: now - 86_400_000, messageCount: 7 },
-  { chatId: 'c4', root: SECRET, title: 'Never shown', updatedAt: now, messageCount: 1 },
+  chat('c1', SNOTRA, 'Release notes for 1.4', 60_000, 12),
+  chat('c2', SNOTRA, 'Why does the sandbox refuse git push?', 3_600_000, 4),
+  chat('c3', WEBSITE, 'Tidy up the landing page', 86_400_000, 7),
+  chat('c4', SECRET, 'Never shown', 0, 1),
 ];
+/** What a turn answers, streamed in pieces: prose, a code block, non-ASCII text. */
+const ANSWER = 'Here are the notes for **1.4**:\n\n```sh\nnpm run release -- 1.4.0\n```\n\nGrüße aus Snotra — fertig.';
+const emit = (activity) => { for (const listener of desktopState.listeners) listener(activity); };
+const run = (chatId, runId, type, payload) => emit({ kind: 'run', chatId, runId, type, payload });
+
+/** A turn that streams its answer; `slow` ones take long enough to be stopped. */
+function startTurn({ chatId, text, runId }) {
+  let target = CHATS.find((c) => c.chatId === chatId);
+  if (!target) {
+    target = { chatId, root: desktopState.active, title: 'New chat', updatedAt: Date.now(), messages: [] };
+    CHATS.push(target);
+  }
+  target.messages.push({ role: 'user', content: text });
+  target.updatedAt = Date.now();
+  desktopState.running.add(chatId);
+  run(chatId, runId, 'progress', { type: 'chat-saved', ok: true });
+  const pieces = text.includes('slowly') ? Array.from({ length: 200 }, (_, i) => `word${i} `) : ANSWER.match(/.{1,12}/gs);
+  let streamed = '';
+  let step = 0;
+  const finish = (interrupted) => {
+    clearInterval(timer);
+    desktopState.turns.delete(chatId);
+    target.messages.push({ role: 'assistant', content: streamed, toolTrace: [{ line: 'Read CHANGELOG.md', tool: 'read_file' }], ...(interrupted ? { interrupted: true } : {}) });
+    target.updatedAt = Date.now();
+    desktopState.running.delete(chatId);
+    run(chatId, runId, 'progress', { type: 'run-end' });
+    console.log(`desktop: turn in ${chatId} ${interrupted ? 'stopped' : 'done'}`);
+  };
+  const timer = setInterval(() => {
+    if (step === 0) run(chatId, runId, 'tool-line', { callIndex: 0, phase: 'start', tool: 'read_file', line: 'Reading CHANGELOG.md' });
+    if (step === 1) run(chatId, runId, 'tool-line', { callIndex: 0, phase: 'done', tool: 'read_file', line: 'Read CHANGELOG.md' });
+    const piece = pieces[step];
+    if (piece === undefined) return finish(false);
+    streamed += piece;
+    run(chatId, runId, 'delta', { text: piece });
+    step += 1;
+  }, 60);
+  desktopState.turns.set(chatId, () => finish(true));
+  console.log(`desktop: turn in ${chatId} started`);
+  return Promise.resolve({ ok: true });
+}
 
 const desktop = {
   knownWorkspaces: async () => [SNOTRA, WEBSITE, SECRET],
   activeWorkspace: () => desktopState.active,
-  listChats: async (roots) => CHATS.filter((c) => roots.includes(c.root)),
-  loadChat: async (chatId) => CHATS.find((c) => c.chatId === chatId) ?? null,
+  listChats: async (roots) => CHATS.filter((c) => roots.includes(c.root))
+    .map(({ chatId, root, title, updatedAt, messages }) => ({ chatId, root, title, updatedAt, messageCount: messages.length })),
+  loadChat: async (chatId) => structuredClone(CHATS.find((c) => c.chatId === chatId && c.messages.length > 0) ?? null),
   runningChats: () => desktopState.running,
   awaitingApproval: () => new Set(),
   pendingApprovals: () => [],
   respondToApproval: () => ({ ok: false, reason: 'not-found' }),
   subscribe: (listener) => { desktopState.listeners.add(listener); return () => desktopState.listeners.delete(listener); },
-  startTurn: async () => ({ ok: false, reason: 'unavailable' }),
-  stopChat: () => false,
+  startTurn,
+  stopChat: (chatId) => {
+    const stop = desktopState.turns.get(chatId);
+    if (!stop) return false;
+    stop();
+    return true;
+  },
   chatConfiguration: async () => ({}),
   // Opening the website starts a turn there, so that switching back is refused (R6).
   activateWorkspace: async (root) => {
     desktopState.active = root;
-    if (root === WEBSITE) desktopState.running = new Set(['c3']);
-    for (const listener of desktopState.listeners) listener({ kind: 'workspace' });
+    if (root === WEBSITE) desktopState.running.add('c3');
+    emit({ kind: 'workspace' });
     console.log(`desktop: switched to ${path.basename(root)}`);
     return { ok: true };
   },
