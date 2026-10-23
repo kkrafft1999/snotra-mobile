@@ -1,6 +1,66 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "%lld messages" : {
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld message"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld messages"
+                }
+              }
+            }
+          }
+        },
+        "de" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld Nachricht"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld Nachrichten"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "A chat is still running" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein Chat läuft noch"
+          }
+        }
+      }
+    },
+    "A file open on your desktop has unsaved changes. Save or discard them there first." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eine auf deinem Desktop geöffnete Datei hat ungesicherte Änderungen. Sichere oder verwirf sie zuerst dort."
+          }
+        }
+      }
+    },
     "Camera" : {
       "localizations" : {
         "de" : {
@@ -11,12 +71,42 @@
         }
       }
     },
+    "Can't connect to your desktop" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Verbindung zu deinem Desktop"
+          }
+        }
+      }
+    },
     "Can't reach the relay" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Das Relay ist nicht erreichbar"
+          }
+        }
+      }
+    },
+    "Chats" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chats"
+          }
+        }
+      }
+    },
+    "Chats you start in this workspace on your desktop appear here." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chats, die du auf deinem Desktop in diesem Workspace beginnst, erscheinen hier."
           }
         }
       }
@@ -101,6 +191,36 @@
         }
       }
     },
+    "Couldn't load the chats" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Chats ließen sich nicht laden"
+          }
+        }
+      }
+    },
+    "Couldn't load your workspaces" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deine Workspaces ließen sich nicht laden"
+          }
+        }
+      }
+    },
+    "Couldn't switch the workspace" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Workspace ließ sich nicht wechseln"
+          }
+        }
+      }
+    },
     "Disconnect" : {
       "localizations" : {
         "de" : {
@@ -131,22 +251,22 @@
         }
       }
     },
-    "Following and driving chats arrives in a later version." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Chats verfolgen und steuern kommt in einer späteren Version."
-          }
-        }
-      }
-    },
     "Hidden while your screen is shared" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ausgeblendet, solange dein Bildschirm geteilt wird"
+          }
+        }
+      }
+    },
+    "In Snotra on your desktop, open the workspace and turn on “Access from your phone” under Settings › Security. Then pull down here." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öffne in Snotra auf deinem Desktop den Workspace und schalte unter Einstellungen › Sicherheit „Zugriff vom Handy“ ein. Zieh dann hier nach unten."
           }
         }
       }
@@ -171,12 +291,62 @@
         }
       }
     },
+    "Loading workspaces…" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Workspaces werden geladen …"
+          }
+        }
+      }
+    },
+    "More" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mehr"
+          }
+        }
+      }
+    },
+    "No chats yet" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Noch keine Chats"
+          }
+        }
+      }
+    },
     "No internet connection" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Keine Internetverbindung"
+          }
+        }
+      }
+    },
+    "No longer open to this iPhone" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nicht mehr für dieses iPhone geöffnet"
+          }
+        }
+      }
+    },
+    "No workspace open to this iPhone" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kein Workspace für dieses iPhone geöffnet"
           }
         }
       }
@@ -197,6 +367,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nicht gekoppelt"
+          }
+        }
+      }
+    },
+    "OK" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
+          }
+        }
+      }
+    },
+    "Open it on your desktop" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auf deinem Desktop öffnen"
+          }
+        }
+      }
+    },
+    "Open on your desktop" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auf deinem Desktop geöffnet"
           }
         }
       }
@@ -291,6 +491,16 @@
         }
       }
     },
+    "Running" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Läuft"
+          }
+        }
+      }
+    },
     "Scan the code in Settings › Remote access in Snotra on your desktop." : {
       "localizations" : {
         "de" : {
@@ -311,6 +521,76 @@
         }
       }
     },
+    "Snotra on your desktop closed this workspace to your phone." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snotra auf deinem Desktop hat diesen Workspace für dein Handy geschlossen."
+          }
+        }
+      }
+    },
+    "Snotra on your desktop could not open this workspace, or no longer opens it to your phone." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snotra auf deinem Desktop konnte diesen Workspace nicht öffnen oder öffnet ihn nicht mehr für dein Handy."
+          }
+        }
+      }
+    },
+    "Snotra on your desktop didn't answer in time." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snotra auf deinem Desktop hat nicht rechtzeitig geantwortet."
+          }
+        }
+      }
+    },
+    "Snotra on your desktop didn't answer in time. Pull down to try again." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snotra auf deinem Desktop hat nicht rechtzeitig geantwortet. Zieh nach unten, um es noch einmal zu versuchen."
+          }
+        }
+      }
+    },
+    "Snotra on your desktop didn't switch in time. Try again in a moment." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snotra auf deinem Desktop hat nicht rechtzeitig gewechselt. Versuch es gleich noch einmal."
+          }
+        }
+      }
+    },
+    "Snotra on your desktop is online but doesn't answer this iPhone. Check that remote access is still on there, then try again." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snotra auf deinem Desktop ist online, antwortet diesem iPhone aber nicht. Prüfe dort, ob der Fernzugriff noch an ist, und versuch es dann noch einmal."
+          }
+        }
+      }
+    },
+    "Snotra on your desktop is working on a chat or waiting for an approval. Switch once it's done." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snotra auf deinem Desktop arbeitet an einem Chat oder wartet auf eine Freigabe. Wechsle, sobald das erledigt ist."
+          }
+        }
+      }
+    },
     "Snotra on your desktop isn't running or has no connection. It shows up here again as soon as it's back." : {
       "localizations" : {
         "de" : {
@@ -327,6 +607,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Snotra auf deinem Desktop kennt dieses iPhone nicht mehr. Kopple es erneut, um seine Chats zu verfolgen und zu steuern."
+          }
+        }
+      }
+    },
+    "Snotra on your desktop speaks a newer version of the connection. Update Snotra for iPhone, then open it again." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snotra auf deinem Desktop spricht eine neuere Version der Verbindung. Aktualisiere Snotra fürs iPhone und öffne die App dann noch einmal."
           }
         }
       }
@@ -421,6 +711,16 @@
         }
       }
     },
+    "This app speaks a newer version of the connection than Snotra on your desktop. Update Snotra there, then try again." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diese App spricht eine neuere Version der Verbindung als Snotra auf deinem Desktop. Aktualisiere Snotra dort und versuch es dann noch einmal."
+          }
+        }
+      }
+    },
     "This code needs a newer version of the app" : {
       "localizations" : {
         "de" : {
@@ -501,12 +801,52 @@
         }
       }
     },
+    "Unsaved changes on your desktop" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ungesicherte Änderungen auf deinem Desktop"
+          }
+        }
+      }
+    },
+    "Update Snotra on your desktop" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktualisiere Snotra auf deinem Desktop"
+          }
+        }
+      }
+    },
     "Update the app from the App Store or TestFlight, then scan the code again." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aktualisiere die App über den App Store oder TestFlight und scanne den Code dann noch einmal."
+          }
+        }
+      }
+    },
+    "Update this app" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktualisiere diese App"
+          }
+        }
+      }
+    },
+    "Waiting for your approval" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wartet auf deine Freigabe"
           }
         }
       }
@@ -521,12 +861,42 @@
         }
       }
     },
+    "Workspace not available" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Workspace nicht verfügbar"
+          }
+        }
+      }
+    },
+    "Workspaces" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Workspaces"
+          }
+        }
+      }
+    },
     "Your chats appear here once the connection stands." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Deine Chats erscheinen hier, sobald die Verbindung steht."
+          }
+        }
+      }
+    },
+    "Your desktop has another workspace open. This switches it over." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auf deinem Desktop ist gerade ein anderer Workspace geöffnet. Damit wechselt er zu diesem."
           }
         }
       }
@@ -547,6 +917,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Die Schlüssel deines Desktops ließen sich nicht prüfen, deshalb wurde nichts gespeichert. Starte noch einmal auf deinem Desktop."
+          }
+        }
+      }
+    },
+    "Your workspaces appear in a moment." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deine Workspaces erscheinen gleich."
           }
         }
       }

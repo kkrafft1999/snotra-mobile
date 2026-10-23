@@ -37,10 +37,17 @@ struct ContentView: View {
     }
 
     private var paired: some View {
-        PairedView(
-            display: ConnectionDisplay(model.connection, networkAvailable: network.isAvailable),
-            onTryNow: { Task { await model.reconnect() } },
-            onDisconnect: { isDisconnectConfirming = true })
+        Group {
+            let display = ConnectionDisplay(model.connection, session: model.session, networkAvailable: network.isAvailable)
+            if display == .connected, let mirror = model.mirror {
+                WorkspacesView(mirror: mirror, onDisconnect: { isDisconnectConfirming = true })
+            } else {
+                PairedView(
+                    display: display,
+                    onTryNow: { Task { await model.reconnect() } },
+                    onDisconnect: { isDisconnectConfirming = true })
+            }
+        }
         .confirmationDialog("Disconnect this iPhone?", isPresented: $isDisconnectConfirming, titleVisibility: .visible) {
             Button("Disconnect", role: .destructive) {
                 Task { await model.unpair() }
