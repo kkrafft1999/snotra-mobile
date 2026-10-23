@@ -81,6 +81,26 @@
         }
       }
     },
+    "Disconnect" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trennen"
+          }
+        }
+      }
+    },
+    "Disconnect this iPhone?" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dieses iPhone trennen?"
+          }
+        }
+      }
+    },
     "Done" : {
       "localizations" : {
         "de" : {
@@ -241,12 +261,42 @@
         }
       }
     },
+    "Removed on your desktop" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auf deinem Desktop entfernt"
+          }
+        }
+      }
+    },
     "Scan the code in Settings › Remote access in Snotra on your desktop." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Scanne den Code unter Einstellungen › Fernzugriff in Snotra auf deinem Desktop."
+          }
+        }
+      }
+    },
+    "Snotra on your desktop can no longer reach it. To use it again, pair it anew." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snotra auf deinem Desktop erreicht es dann nicht mehr. Um es wieder zu nutzen, kopple es neu."
+          }
+        }
+      }
+    },
+    "Snotra on your desktop no longer knows this iPhone. Pair it again to follow and drive its chats." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snotra auf deinem Desktop kennt dieses iPhone nicht mehr. Kopple es erneut, um seine Chats zu verfolgen und zu steuern."
           }
         }
       }
