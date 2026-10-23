@@ -69,6 +69,8 @@ final class DesktopMirror {
     private(set) var switching: Workspace.ID?
     /// The chats running or waiting at the desktop, from its last `state`; nil before the first.
     private var runningChats: [String: ChatState]?
+    /// The chats on screen, which hear their events.
+    private var openChats: [String: ChatModel] = [:]
 
     typealias Call = @MainActor (String, JSONValue) async throws(RemoteCallError) -> JSONValue
     private let call: Call
@@ -94,6 +96,28 @@ final class DesktopMirror {
     func sessionStarted() async {
         await refreshWorkspaces()
         for id in chats.keys { await refreshChats(id) }
+        for chat in openChats.values { await chat.sessionStarted() }
+    }
+
+    /// A chat for its screen; it hears its events while attached.
+    func chat(_ route: ChatRoute) -> ChatModel {
+        openChats[route.chatId]
+            ?? ChatModel(chatId: route.chatId, workspaceId: route.workspaceId, title: route.title, isNew: route.isNew, call: call)
+    }
+
+    /// `chat.new` in the workspace open at the desktop. Nothing exists there until the first question.
+    func newChat(in workspaceId: Workspace.ID) async throws(RemoteCallError) -> ChatRoute {
+        let answer = try await call("chat.new", .object(["workspaceId": .string(workspaceId)]))
+        guard let chatId = answer["chatId"]?.stringValue else { throw .malformedAnswer }
+        return ChatRoute(chatId: chatId, workspaceId: workspaceId, isNew: true)
+    }
+
+    func attach(_ chat: ChatModel) {
+        openChats[chat.chatId] = chat
+    }
+
+    func detach(_ chat: ChatModel) {
+        if openChats[chat.chatId] === chat { openChats[chat.chatId] = nil }
     }
 
     func refreshWorkspaces() async {
@@ -173,6 +197,21 @@ final class DesktopMirror {
             }
         case "session.resync":
             await sessionStarted()
+            return
+        default:
+            break
+        }
+        if method.hasPrefix("chat."), let chatId = params["chatId"]?.stringValue, let chat = openChats[chatId] {
+            chat.apply(method, params)
+        }
+        switch method {
+        case "chat.progress" where params["type"]?.stringValue == "run-end":
+            // The list's message counts and order changed with the turn.
+            for (workspaceId, list) in chats {
+                if case .loaded(let rows) = list, rows.contains(where: { $0.chatId == params["chatId"]?.stringValue }) {
+                    Task { await refreshChats(workspaceId) }
+                }
+            }
         default:
             break
         }
@@ -183,4 +222,14 @@ final class DesktopMirror {
         for index in list.indices { list[index].active = list[index].id == workspaceId }
         workspaces = .loaded(list)
     }
+}
+
+/// Where a chat's screen is, for the navigation stack.
+struct ChatRoute: Hashable, Identifiable {
+    let chatId: String
+    let workspaceId: DesktopMirror.Workspace.ID
+    var title = ""
+    var isNew = false
+
+    var id: String { chatId }
 }
