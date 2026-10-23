@@ -15,6 +15,9 @@ struct WorkspacesView: View {
                 .navigationDestination(for: DesktopMirror.Workspace.ID.self) { id in
                     ChatsView(mirror: mirror, workspaceId: id)
                 }
+                .navigationDestination(for: ChatRoute.self) { route in
+                    ChatView(mirror: mirror, route: route)
+                }
                 .toolbar {
                     ToolbarItem(placement: .topBarTrailing) {
                         Menu {
