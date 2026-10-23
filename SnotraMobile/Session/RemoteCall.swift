@@ -39,8 +39,8 @@ enum SessionHello {
             "protocol": .array(protocolVersions.map { .number(Double($0)) }),
             "client": .object(["name": .string(clientName), "version": .string(String(version.prefix(32)))]),
             "locale": .string(locale),
-            // `approvals` comes with the approval cards (#39).
-            "capabilities": .array([]),
+            // The cards of the chats the phone follows, answered with *allow once* or *deny* (§7.4).
+            "capabilities": .array([.string("approvals")]),
         ])
     }
 

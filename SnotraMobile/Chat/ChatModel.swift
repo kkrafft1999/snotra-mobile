@@ -25,6 +25,19 @@ final class ChatModel {
         case notDelivered
     }
 
+    /// Why an answer to an approval card did not go out.
+    enum ApprovalRefusal: Equatable {
+        /// The iPhone has no passcode, so nothing can be allowed from it.
+        case noPasscode
+        /// Face ID or the passcode was cancelled or failed.
+        case notConfirmed
+        /// The card is no longer open at the desktop.
+        case gone
+        /// The desktop does not take this answer from the phone (`refused`).
+        case refused
+        case notDelivered
+    }
+
     let chatId: String
     let workspaceId: DesktopMirror.Workspace.ID
     private(set) var transcript: ChatTranscript
@@ -34,17 +47,21 @@ final class ChatModel {
     private(set) var loadingOlder = false
     /// A chat made with `chat.new` holds nothing at the desktop until its first question is saved.
     private(set) var isNew: Bool
+    /// The cards an answer is on its way for.
+    private(set) var answering: Set<String> = []
 
     private let call: DesktopMirror.Call
+    private let presence: any UserPresence
     /// The id of a message that did not get an answer, kept with its text so that sending it again starts nothing twice.
     private var unanswered: (text: String, clientMessageId: String)?
     private var reloading = false
 
     init(chatId: String, workspaceId: DesktopMirror.Workspace.ID, title: String = "", isNew: Bool = false,
-         call: @escaping DesktopMirror.Call) {
+         presence: any UserPresence = DeviceOwnerPresence(), call: @escaping DesktopMirror.Call) {
         self.chatId = chatId
         self.workspaceId = workspaceId
         self.isNew = isNew
+        self.presence = presence
         self.call = call
         transcript = ChatTranscript(chatId: chatId, title: title)
         loading = isNew ? .loaded : .loading
@@ -116,6 +133,40 @@ final class ChatModel {
         stopping = true
         defer { stopping = false }
         _ = try? await call("run.abort", .object(["chatId": .string(chatId)]))
+    }
+
+    /// `approval.respond` for an open card. *Allow once* lets the agent act,
+    /// so it needs Face ID or the passcode first; *deny* never loosens
+    /// anything and goes out at once. Nil once the desktop took the answer.
+    func respond(to requestId: String, _ answer: ApprovalRequest.Answer) async -> ApprovalRefusal? {
+        guard let request = transcript.openApprovals.first(where: { $0.requestId == requestId }),
+              request.offers(answer), !answering.contains(requestId) else { return nil }
+        answering.insert(requestId)
+        defer { answering.remove(requestId) }
+        if answer == .allowOnce {
+            guard presence.canConfirm else { return .noPasscode }
+            let tool = request.tool
+            guard await presence.confirm(String(localized: "Allow \(tool) once on your desktop")) else { return .notConfirmed }
+        }
+        var params: [String: JSONValue] = ["requestId": .string(requestId), "response": .string(answer.rawValue)]
+        if answer == .allowOnce, let paths = request.sandboxPaths {
+            params["sandboxPaths"] = .array(paths.map { .string($0) })
+        }
+        do throws(RemoteCallError) {
+            let result = try await call("approval.respond", .object(params))
+            let given = result["response"]?.stringValue.flatMap(ApprovalRequest.Answer.init(rawValue:)) ?? answer
+            transcript.answered(requestId, given == .deny ? .denied : .allowed)
+            return nil
+        } catch {
+            switch error.reason {
+            case "not-found":
+                // Settled elsewhere or expired; reading the chat again says which cards are still open.
+                await open()
+                return .gone
+            case "refused": return .refused
+            default: return .notDelivered
+            }
+        }
     }
 
     /// An event of the desktop for this chat. Reading the stored answer runs

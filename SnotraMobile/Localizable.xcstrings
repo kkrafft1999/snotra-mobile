@@ -71,6 +71,86 @@
         }
       }
     },
+    "Allow %@ once on your desktop" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ einmal auf deinem Desktop erlauben"
+          }
+        }
+      }
+    },
+    "Allow once" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einmal erlauben"
+          }
+        }
+      }
+    },
+    "Allowed" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erlaubt"
+          }
+        }
+      }
+    },
+    "Allowed by %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erlaubt von %@"
+          }
+        }
+      }
+    },
+    "Allowed on your desktop" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auf deinem Desktop erlaubt"
+          }
+        }
+      }
+    },
+    "Allowed once from your phone" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einmal erlaubt, vom Handy aus"
+          }
+        }
+      }
+    },
+    "Allowing from your phone needs Face ID or your passcode. Set a passcode in the iPhone's settings, or answer on your desktop." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zum Erlauben vom Handy aus braucht es Face ID oder deinen Code. Richte in den iPhone-Einstellungen einen Code ein oder antworte auf deinem Desktop."
+          }
+        }
+      }
+    },
+    "Answer it on your desktop." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beantworte sie auf deinem Desktop."
+          }
+        }
+      }
+    },
     "Ask something. Snotra on your desktop answers in this workspace." : {
       "localizations" : {
         "de" : {
@@ -261,6 +341,56 @@
         }
       }
     },
+    "Denied" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abgelehnt"
+          }
+        }
+      }
+    },
+    "Denied by %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abgelehnt von %@"
+          }
+        }
+      }
+    },
+    "Denied from your phone" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abgelehnt, vom Handy aus"
+          }
+        }
+      }
+    },
+    "Denied on your desktop" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auf deinem Desktop abgelehnt"
+          }
+        }
+      }
+    },
+    "Deny" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ablehnen"
+          }
+        }
+      }
+    },
     "Disconnect" : {
       "localizations" : {
         "de" : {
@@ -287,6 +417,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Fertig"
+          }
+        }
+      }
+    },
+    "Expired without an answer" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ohne Antwort abgelaufen"
           }
         }
       }
@@ -337,6 +477,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Es kommt zusammen mit dem Fernzugriff in Snotra auf deinem Desktop."
+          }
+        }
+      }
+    },
+    "It was answered on your desktop or ran out of time." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sie wurde auf deinem Desktop beantwortet oder ist abgelaufen."
           }
         }
       }
@@ -407,6 +557,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Keine Internetverbindung"
+          }
+        }
+      }
+    },
+    "No longer open on your desktop" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auf deinem Desktop nicht mehr offen"
           }
         }
       }
@@ -621,6 +781,16 @@
         }
       }
     },
+    "Set up a passcode first" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Richte zuerst einen Code ein"
+          }
+        }
+      }
+    },
     "Shorten it and send it again." : {
       "localizations" : {
         "de" : {
@@ -631,12 +801,32 @@
         }
       }
     },
+    "Shortened — the whole of it is on your desktop." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gekürzt – vollständig steht es auf deinem Desktop."
+          }
+        }
+      }
+    },
     "Show earlier messages" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Frühere Nachrichten anzeigen"
+          }
+        }
+      }
+    },
+    "Snotra asks for your approval" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snotra bittet um deine Freigabe"
           }
         }
       }
@@ -717,6 +907,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Snotra auf deinem Desktop hat sie nicht rechtzeitig bestätigt. Sende sie noch einmal – doppelt gefragt wird nicht."
+          }
+        }
+      }
+    },
+    "Snotra on your desktop didn't confirm it in time. Try again." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snotra auf deinem Desktop hat sie nicht rechtzeitig bestätigt. Versuch es noch einmal."
           }
         }
       }
@@ -871,6 +1071,16 @@
         }
       }
     },
+    "The answer didn't go out" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Antwort ist nicht angekommen"
+          }
+        }
+      }
+    },
     "The app keeps trying. Snotra's relay may be down for a moment." : {
       "localizations" : {
         "de" : {
@@ -937,6 +1147,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Diese App spricht eine neuere Version der Verbindung als Snotra auf deinem Desktop. Aktualisiere Snotra dort und versuch es dann noch einmal."
+          }
+        }
+      }
+    },
+    "This approval is no longer open" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diese Freigabe ist nicht mehr offen"
           }
         }
       }
@@ -1187,6 +1407,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Deine Chats erscheinen hier, sobald die Verbindung steht."
+          }
+        }
+      }
+    },
+    "Your desktop didn't take this answer" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dein Desktop hat diese Antwort nicht angenommen"
           }
         }
       }
