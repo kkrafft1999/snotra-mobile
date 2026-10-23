@@ -48,9 +48,13 @@ struct RelayChannelTests {
 
     @Test func theDesktopGoesOfflineWhenItsHeartbeatAges() async throws {
         var timing = fast
-        timing.desktopTimeout = 0.2
+        timing.desktopTimeout = 3
         relay.streams["meta"] = .init(text: meta)
-        relay.streams["presence/desktop"] = .init(text: FakeRelay.put("/", #"{"lastSeen":\#(nowMs)}"#))
+        // Stamped when the stream opens, not when the test starts: a slow runner must not age it first.
+        relay.streamFor = { node in
+            guard node == "presence/desktop" else { return nil }
+            return .init(text: FakeRelay.put("/", #"{"lastSeen":\#(Date().timeIntervalSince1970 * 1000)}"#))
+        }
         let channel = RelayChannel(client: relay.client, channelId: relay.channelId, timing: timing, sign: relay.sign)
         let log = EventLog(channel)
         await channel.start()

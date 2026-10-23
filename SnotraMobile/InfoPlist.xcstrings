@@ -1,0 +1,24 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "NSCameraUsageDescription" : {
+      "comment" : "Asked before the camera opens to scan the pairing code.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snotra uses the camera to scan the pairing code on your desktop."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snotra nutzt die Kamera, um den Kopplungscode auf deinem Desktop zu scannen."
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

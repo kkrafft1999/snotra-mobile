@@ -67,20 +67,27 @@ struct RelayClient: Sendable {
         return Session(idToken: idToken, expiresAt: started.addingTimeInterval(lifetime), serverOffset: offset)
     }
 
-    /// One JSON call with a small answer. Returns the answer and the server's `Date`.
-    private func call(_ url: URL, body: JSONValue, appCheck: Bool = true) async throws -> (JSONValue, Date?) {
+    /// One JSON call with a small answer. Returns the answer — `.null` for an
+    /// empty one, as `204` brings — and the server's `Date`.
+    func call(_ url: URL, method: String = "POST", body: JSONValue? = .object([:]),
+              bearer: String? = nil, appCheck: Bool = true) async throws -> (JSONValue, Date?) {
         var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpMethod = method
+        if let body {
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.httpBody = try body.data()
+        }
         if appCheck { request.setValue(endpoint.appCheckToken, forHTTPHeaderField: "X-Firebase-AppCheck") }
-        request.httpBody = try body.data()
+        if let bearer { request.setValue("Bearer \(bearer)", forHTTPHeaderField: "Authorization") }
         let (data, response) = try await transport.send(request)
         guard data.count <= Self.maxResponseBytes else { throw RelayError.invalidResponse }
         let answer = data.isEmpty ? JSONValue.null : ((try? JSONValue(data: data)) ?? .null)
         guard (200..<300).contains(response.statusCode) else {
             throw RelayError(status: response.statusCode, reason: answer["error"]?["reason"]?.stringValue)
         }
-        guard case .object = answer else { throw RelayError.invalidResponse }
+        if !data.isEmpty {
+            guard case .object = answer else { throw RelayError.invalidResponse }
+        }
         return (answer, Self.date(of: response))
     }
 

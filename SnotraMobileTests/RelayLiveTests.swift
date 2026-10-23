@@ -13,7 +13,8 @@ enum LiveRelay {
               let apiKey = environment["SNOTRA_RELAY_API_KEY"],
               let appCheck = environment["SNOTRA_RELAY_APP_CHECK_TOKEN"]
         else { return nil }
-        return RelayEndpoint(relayURL: relay, databaseURL: database, identityToolkitURL: identity,
+        let host = [relay.host(), relay.port.map(String.init)].compactMap { $0 }.joined(separator: ":")
+        return RelayEndpoint(host: host, relayURL: relay, databaseURL: database, identityToolkitURL: identity,
                              apiKey: apiKey, appCheckToken: appCheck)
     }
 }
@@ -54,10 +55,49 @@ struct RelayLiveTests {
         #expect(await log.waitFor(.ended, within: 10))
     }
 
-    /// Part 1 with both sides played here: open (§5.3), claim (§5.5), confirm (§5.6).
-    private func pair() async throws -> (channelId: Data, desktopToken: String) {
+    /// The app's whole pairing (#34) — look-up, claim, the words, `MAC_D` — with the desktop played here.
+    @MainActor @Test func theAppPairsThroughTheRelay() async throws {
         let desktopKeys = KeyBundle(sign: desktopSign.publicKey, agree: desktopAgree.publicKey)
-        var challenge = try await client.challenge()
+        let (channelId, pairingId, desktopToken) = try await openPairing()
+        let secret = String((0..<15).map { _ in PairingCode.alphabet.randomElement()! })
+        let code = PairingCode(pairingId: pairingId, secret: secret)
+        let pairingMemory = MemoryStore()
+        let flow = PairingFlow(
+            relays: [endpoint], transport: transport,
+            keyStore: DeviceKeyStore(store: MemoryStore(), kind: .software),
+            pairingStore: PairingStore(store: pairingMemory), wordList: try .bundled())
+        flow.submit(typed: code.display)
+
+        // The desktop sees the claim (steps 25–26) and checks MAC_P.
+        var meta = JSONValue.null
+        for _ in 0..<100 where meta["status"]?.stringValue != "pending" {
+            try await Task.sleep(for: .milliseconds(100))
+            meta = try await get(channelId: channelId, node: "meta", token: desktopToken)
+        }
+        let phoneKeys = try KeyBundle(json: try #require(meta["phoneKeys"]))
+        let transcript = PairingMAC.transcript(channelId: channelId, desktopKeys: desktopKeys, phoneKeys: phoneKeys)
+        #expect(meta["macP"]?.stringValue == PairingMAC.phone(code: code, transcript: transcript).base64URLEncodedString)
+        guard case .comparing = flow.step else { Issue.record("no words shown: \(flow.step)"); return }
+
+        // *Allow* (steps 33–35).
+        _ = try await post("channels/\(channelId.base64URLEncodedString)/confirm", body: .object([
+            "macD": .string(PairingMAC.desktop(code: code, transcript: transcript).base64URLEncodedString),
+        ]), bearer: desktopToken)
+        for _ in 0..<100 where !isPaired(flow.step) { try await Task.sleep(for: .milliseconds(100)) }
+        #expect(flow.step == .paired(PairingRecord(relayHost: endpoint.host, channelId: channelId, desktopKeys: desktopKeys)))
+        #expect(try PairingStore(store: pairingMemory).load()?.channelId == channelId)
+
+        _ = try await post("channels/\(channelId.base64URLEncodedString)", method: "DELETE", body: nil, bearer: desktopToken)
+    }
+
+    private func isPaired(_ step: PairingFlow.Step) -> Bool {
+        if case .paired = step { true } else { false }
+    }
+
+    /// §5.3, as the desktop does it.
+    private func openPairing() async throws -> (channelId: Data, pairingId: String, desktopToken: String) {
+        let desktopKeys = KeyBundle(sign: desktopSign.publicKey, agree: desktopAgree.publicKey)
+        let challenge = try await client.challenge()
         let opened = try await post("pairings", body: .object([
             "challenge": .string(challenge.text),
             "desktopKeys": try keys(desktopKeys),
@@ -67,9 +107,14 @@ struct RelayLiveTests {
         let channelId = try #require(opened["channelId"]?.stringValue.flatMap { Data(base64URL: $0) })
         let pairingId = try #require(opened["pairingId"]?.stringValue)
         let desktop = try await client.signIn(customToken: try #require(opened["token"]?.stringValue))
+        return (channelId, pairingId, desktop.idToken)
+    }
 
+    /// Part 1 with both sides played here: open (§5.3), claim (§5.5), confirm (§5.6).
+    private func pair() async throws -> (channelId: Data, desktopToken: String) {
+        let (channelId, pairingId, desktopToken) = try await openPairing()
         let phoneKeys = KeyBundle(sign: phoneSign.publicKey, agree: phoneAgree.publicKey)
-        challenge = try await client.challenge()
+        let challenge = try await client.challenge()
         _ = try await post("pairings/\(pairingId)/claim", body: .object([
             "challenge": .string(challenge.text),
             "phoneKeys": try keys(phoneKeys),
@@ -80,8 +125,8 @@ struct RelayLiveTests {
         ]))
         _ = try await post("channels/\(channelId.base64URLEncodedString)/confirm",
                            body: .object(["macD": .string(Data(repeating: 2, count: 32).base64URLEncodedString)]),
-                           bearer: desktop.idToken)
-        return (channelId, desktop.idToken)
+                           bearer: desktopToken)
+        return (channelId, desktopToken)
     }
 
     private func keys(_ bundle: KeyBundle) throws -> JSONValue {
@@ -100,6 +145,13 @@ struct RelayLiveTests {
         let (data, response) = try await transport.send(request)
         try #require((200..<300).contains(response.statusCode), "\(method) \(path): \(response.statusCode) \(String(decoding: data, as: UTF8.self))")
         return data.isEmpty ? .null : try JSONValue(data: data)
+    }
+
+    private func get(channelId: Data, node: String, token: String) async throws -> JSONValue {
+        let request = URLRequest(url: endpoint.databaseNodeURL(channelId: channelId, node: node, idToken: token))
+        let (data, response) = try await transport.send(request)
+        try #require(response.statusCode == 200, "GET \(node): \(response.statusCode)")
+        return try JSONValue(data: data)
     }
 
     private func put(channelId: Data, node: String, token: String, body: JSONValue) async throws {
