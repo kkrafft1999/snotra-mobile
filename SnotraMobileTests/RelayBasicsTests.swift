@@ -93,7 +93,7 @@ struct RelayEndpointTests {
     @Test func productionNamesItsRelayAndKnowsNoFixedAppCheckToken() {
         #expect(production.host == "relay.snotra-ai.dev")
         #expect(production.relayURL.appending(path: "challenges").absoluteString == "https://relay.snotra-ai.dev/v1/challenges")
-        #expect(production.appCheckToken == nil)
+        #expect(production.appCheck == .appAttest(AppAttestApp(project: "snotra-ai", appId: "1:123456789012:ios:0a1b2c")))
         #expect(RelayEndpoint.emulator.appCheckURL("exchangeAppAttestAttestation") == nil)
     }
 

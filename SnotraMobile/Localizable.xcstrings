@@ -161,6 +161,16 @@
         }
       }
     },
+    "Apple couldn't confirm that this copy of the app is genuine. Try again later, or install the app again from TestFlight or the App Store." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple konnte nicht bestätigen, dass diese Kopie der App echt ist. Versuch es später noch einmal oder installiere die App neu über TestFlight oder den App Store."
+          }
+        }
+      }
+    },
     "Ask something. Snotra on your desktop answers in this workspace." : {
       "localizations" : {
         "de" : {
@@ -751,6 +761,16 @@
         }
       }
     },
+    "Pairing needs App Attest, which this iPhone or this copy of the app doesn't offer. Update iOS, or install the app from TestFlight or the App Store." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zum Koppeln braucht es App Attest, und das bieten dieses iPhone oder diese Kopie der App nicht. Aktualisiere iOS oder installiere die App über TestFlight oder den App Store."
+          }
+        }
+      }
+    },
     "Point the camera at the code Snotra shows on your desktop." : {
       "localizations" : {
         "de" : {
@@ -1161,6 +1181,16 @@
         }
       }
     },
+    "The relay didn't accept this app" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Relay hat diese App nicht angenommen"
+          }
+        }
+      }
+    },
     "The words you compare when pairing come from the EFF short word list 2.0, © 2016 Electronic Frontier Foundation, licensed under Creative Commons Attribution 3.0 United States (CC BY 3.0 US). The dice numbers were dropped; order and spelling are as published." : {
       "localizations" : {
         "de" : {
@@ -1227,6 +1257,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dieser Code verweist auf ein unbekanntes Relay"
+          }
+        }
+      }
+    },
+    "This iPhone can't pair" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dieses iPhone kann nicht koppeln"
           }
         }
       }

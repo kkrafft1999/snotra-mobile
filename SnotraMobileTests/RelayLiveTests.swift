@@ -15,7 +15,7 @@ enum LiveRelay {
         else { return nil }
         let host = [relay.host(), relay.port.map(String.init)].compactMap { $0 }.joined(separator: ":")
         return RelayEndpoint(host: host, relayURL: relay, databaseURL: database, identityToolkitURL: identity,
-                             apiKey: apiKey, appCheckToken: appCheck)
+                             apiKey: apiKey, appCheck: .debugToken(appCheck))
     }
 }
 
@@ -176,7 +176,7 @@ struct RelayLiveTests {
     private func post(_ path: String, method: String = "POST", body: JSONValue?, bearer: String? = nil) async throws -> JSONValue {
         var request = URLRequest(url: endpoint.relayURL.appending(path: path))
         request.httpMethod = method
-        request.setValue(endpoint.appCheckToken, forHTTPHeaderField: "X-Firebase-AppCheck")
+        if case .debugToken(let token) = endpoint.appCheck { request.setValue(token, forHTTPHeaderField: "X-Firebase-AppCheck") }
         if let bearer { request.setValue("Bearer \(bearer)", forHTTPHeaderField: "Authorization") }
         if let body {
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")

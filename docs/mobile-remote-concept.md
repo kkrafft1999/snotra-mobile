@@ -578,6 +578,13 @@ Decided on 2026-10-22, with #33:
   presence becomes a heartbeat like the desktop's
   ([snotra#1227](https://github.com/kkrafft1999/snotra/issues/1227)), and the
   app brings its own stream reader instead of the SDK's.
+- **App Check without the SDK, too** (#51). The app keeps one App Attest key
+  per installation, attests it once through App Check's REST API
+  (`exchangeAppAttestAttestation`) and gets every later token by assertion
+  (`exchangeAppAttestAssertion`). Only `lookup` and `claim` carry a token:
+  `lookup` a reusable one, `claim` a limited-use one, which the relay
+  consumes. Debug builds keep the emulator's fixed value; a release build has
+  no such path.
 
 Still open:
 

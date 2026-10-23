@@ -13,24 +13,10 @@ struct RelayEndpoint: Sendable, Equatable {
     let identityToolkitURL: URL
     /// The project's web API key — it names the project to the Identity Toolkit.
     let apiKey: String
-    /// A fixed `X-Firebase-AppCheck` value, which only the emulator accepts.
-    /// Production has none: its tokens come from App Attest (#51).
-    let appCheckToken: String?
-    /// The iOS app's resource in App Check's REST API, which exchanges App
-    /// Attest's attestations and assertions for tokens (#51). Production only.
-    let appCheckAppURL: URL?
+    /// Where the `X-Firebase-AppCheck` token of `lookup` and `claim` comes from.
+    let appCheck: AppCheckSource
 
-    init(host: String, relayURL: URL, databaseURL: URL, identityToolkitURL: URL, apiKey: String,
-         appCheckToken: String? = nil, appCheckAppURL: URL? = nil) {
-        self.host = host
-        self.relayURL = relayURL
-        self.databaseURL = databaseURL
-        self.identityToolkitURL = identityToolkitURL
-        self.apiKey = apiKey
-        self.appCheckToken = appCheckToken
-        self.appCheckAppURL = appCheckAppURL
-    }
-
+    #if DEBUG
     /// The Firebase emulator of snotra-promotion (`docs/relay.md`, *Local
     /// preview*) on this Mac. The simulator reaches it at 127.0.0.1, which App
     /// Transport Security leaves alone as an IP address.
@@ -40,7 +26,8 @@ struct RelayEndpoint: Sendable, Equatable {
         databaseURL: URL(string: "http://127.0.0.1:9000/?ns=snotra-ai-relay")!,
         identityToolkitURL: URL(string: "http://127.0.0.1:9099/identitytoolkit.googleapis.com/v1")!,
         apiKey: "emulator-api-key",
-        appCheckToken: "emulator-app-check")
+        appCheck: .debugToken("emulator-app-check"))
+    #endif
 
     /// The production relay of the Firebase project `snotra-ai` (snotra#1193).
     /// Its addresses are public; the API key and the iOS app's Firebase app ID
@@ -53,8 +40,7 @@ struct RelayEndpoint: Sendable, Equatable {
             databaseURL: URL(string: "https://snotra-ai-relay.europe-west1.firebasedatabase.app/")!,
             identityToolkitURL: URL(string: "https://identitytoolkit.googleapis.com/v1")!,
             apiKey: apiKey,
-            appCheckAppURL: URL(string: "https://firebaseappcheck.googleapis.com/v1/projects/snotra-ai/apps")!
-                .appending(path: firebaseAppId))
+            appCheck: .appAttest(AppAttestApp(project: "snotra-ai", appId: firebaseAppId)))
     }
 
     /// The relays this build ships with (§4): a QR code that names any other host
@@ -93,7 +79,7 @@ struct RelayEndpoint: Sendable, Equatable {
     /// `…/apps/{app ID}:{method}`, a call of App Check's REST API such as
     /// `exchangeAppAttestAttestation`; `nil` where the relay takes a fixed token.
     func appCheckURL(_ method: String) -> URL? {
-        guard let appCheckAppURL else { return nil }
-        return URL(string: appCheckAppURL.absoluteString + ":" + method)
+        guard case .appAttest(let app) = appCheck else { return nil }
+        return app.url(method)
     }
 }

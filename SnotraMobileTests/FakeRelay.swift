@@ -30,7 +30,7 @@ final class FakeRelay: RelayTransport, @unchecked Sendable {
         databaseURL: URL(string: "http://db.test/?ns=relay")!,
         identityToolkitURL: URL(string: "http://idp.test/v1")!,
         apiKey: "key",
-        appCheckToken: "app-check")
+        appCheck: .debugToken("app-check"))
 
     /// Overrides for an endpoint, by its last path component (`challenges`, `tokens`, …).
     var answers: [String: Answer] = [:]

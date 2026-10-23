@@ -31,6 +31,10 @@ final class PairingFlow {
         case notVerified
         /// The phone could not create or keep its keys.
         case keys
+        /// No App Attest on this device or in this build, so the relay would refuse it.
+        case deviceUnsupported
+        /// Apple or App Check would not vouch for this copy of the app.
+        case appNotAccepted
     }
 
     private(set) var step: Step = .entering
@@ -40,6 +44,9 @@ final class PairingFlow {
     private let keyStore: DeviceKeyStore
     private let pairingStore: PairingStore
     private let wordList: SafetyPhrase.WordList
+    private let makeAppCheck: (RelayEndpoint) -> any AppCheckProvider
+    /// One provider per relay, so that `lookup`'s token serves the next attempt as well.
+    private var appChecks: [String: any AppCheckProvider] = [:]
     private var running: Task<Void, Never>?
     /// The claimed channel and its token, so that *Cancel* can delete it.
     private var claimed: (client: RelayClient, channelId: Data, idToken: String)?
@@ -48,12 +55,14 @@ final class PairingFlow {
          transport: any RelayTransport = URLSessionTransport(),
          keyStore: DeviceKeyStore = DeviceKeyStore(),
          pairingStore: PairingStore = PairingStore(),
-         wordList: SafetyPhrase.WordList) {
+         wordList: SafetyPhrase.WordList,
+         appCheck: ((RelayEndpoint) -> any AppCheckProvider)? = nil) {
         self.relays = relays
         self.transport = transport
         self.keyStore = keyStore
         self.pairingStore = pairingStore
         self.wordList = wordList
+        makeAppCheck = appCheck ?? { [transport] relay in relay.appCheck.provider(for: relay, transport: transport) }
     }
 
     /// A typed key goes to the first relay this build ships with (§4).
@@ -105,7 +114,9 @@ final class PairingFlow {
     }
 
     private func run(_ code: PairingCode, at relay: RelayEndpoint) async {
-        let client = RelayClient(endpoint: relay, transport: transport)
+        let appCheck = appChecks[relay.host] ?? makeAppCheck(relay)
+        appChecks[relay.host] = appCheck
+        let client = RelayClient(endpoint: relay, transport: transport, appCheck: appCheck)
         do {
             // Steps 15–16: fresh keys for every pairing.
             let keys: DeviceKeys
@@ -143,6 +154,9 @@ final class PairingFlow {
         } catch RelayError.notFound {
             await dropKeys()
             fail(claimed == nil ? .expired : .notAllowed)
+        } catch let error as AppCheckError {
+            await dropKeys()
+            fail(error == .unsupported ? .deviceUnsupported : .appNotAccepted)
         } catch is ChannelGone {
             claimed = nil
             await dropKeys()
