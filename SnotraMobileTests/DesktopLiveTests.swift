@@ -4,8 +4,8 @@ import Testing
 
 /// The app against Snotra's own desktop half of the channel — its
 /// `remote-channel.js` and `remote-dispatcher.js`, behind the relay stand-in —
-/// from pairing through a followed, a stopped and a new chat to the workspace
-/// switch. Off unless
+/// from pairing through a followed, a stopped and a new chat and its approval
+/// cards to the workspace switch. Off unless
 /// `SNOTRA_DESKTOP_HARNESS` (`TEST_RUNNER_SNOTRA_DESKTOP_HARNESS` for
 /// `xcodebuild test`) names the file `scripts/desktop-harness.js` wrote: the
 /// relay's configuration and the key to type. CI does not run it.
@@ -35,6 +35,7 @@ struct DesktopLiveTests {
         model.reload()
         model.activate()
         let mirror = try #require(model.mirror)
+        mirror.presence = Present()
         for _ in 0..<300 where !isLoaded(mirror.workspaces) { try await Task.sleep(for: .milliseconds(100)) }
         guard case .ready(let welcome) = model.session else { Issue.record("no session: \(model.session)"); return }
         #expect(welcome.protocolVersion == 1)
@@ -73,6 +74,37 @@ struct DesktopLiveTests {
         await chat.stop()
         for _ in 0..<200 where chat.transcript.isRunning || chat.transcript.hasProvisionalAnswer { try await Task.sleep(for: .milliseconds(25)) }
         #expect(chat.transcript.messages.last?.interrupted == true)
+
+        // #39: a card allowed from the phone behind Face ID, one denied, one the desktop answers.
+        #expect(await chat.send("Release it, after my approval") == nil)
+        for _ in 0..<200 where chat.transcript.openApprovals.isEmpty { try await Task.sleep(for: .milliseconds(25)) }
+        let allowed = try #require(chat.transcript.openApprovals.first)
+        #expect(allowed.targets.map(\.path) == ["scripts/release.sh"])
+        #expect(allowed.preview?.text == "npm run release -- 1.4.0")
+        #expect(allowed.options == ["allow-once", "deny"])
+        #expect(await chat.respond(to: allowed.requestId, .allowOnce) == nil)
+        for _ in 0..<200 where chat.transcript.isRunning || chat.transcript.hasProvisionalAnswer { try await Task.sleep(for: .milliseconds(25)) }
+        #expect(chat.transcript.messages.last?.text == Self.answer)
+
+        #expect(await chat.send("Release it, approval needed") == nil)
+        for _ in 0..<200 where chat.transcript.openApprovals.isEmpty { try await Task.sleep(for: .milliseconds(25)) }
+        let denied = try #require(chat.transcript.openApprovals.first)
+        #expect(await chat.respond(to: denied.requestId, .deny) == nil)
+        for _ in 0..<200 where chat.transcript.isRunning || chat.transcript.hasProvisionalAnswer { try await Task.sleep(for: .milliseconds(25)) }
+        #expect(chat.transcript.messages.last?.text == "Not run: denied.")
+
+        #expect(await chat.send("Release it, the desktop answers") == nil)
+        for _ in 0..<200 where chat.transcript.openApprovals.isEmpty { try await Task.sleep(for: .milliseconds(25)) }
+        let elsewhere = try #require(chat.transcript.openApprovals.first)
+        var note: ApprovalOutcome?
+        for _ in 0..<200 where note == nil {
+            note = chat.transcript.approvals.first { $0.id == elsewhere.requestId }?.outcome
+            try await Task.sleep(for: .milliseconds(10))
+        }
+        #expect(note == ApprovalOutcome(kind: .denied, by: .desktop))
+        // Too late from the phone: the card is no longer open.
+        #expect(await chat.respond(to: elsewhere.requestId, .deny) == nil)
+        for _ in 0..<200 where chat.transcript.isRunning || chat.transcript.hasProvisionalAnswer { try await Task.sleep(for: .milliseconds(25)) }
         mirror.detach(chat)
         await chat.close()
 
@@ -100,6 +132,12 @@ struct DesktopLiveTests {
 
         await model.unpair()
         #expect(model.pairing == nil)
+    }
+
+    /// Face ID, always confirmed.
+    struct Present: UserPresence {
+        var canConfirm: Bool { true }
+        func confirm(_ reason: String) async -> Bool { true }
     }
 
     /// What the harness's turns answer.

@@ -4,7 +4,8 @@
 // (remote-dispatcher.js) from a Snotra checkout, behind the relay stand-in,
 // with a fake desktop port: three known folders, two of them opened to the
 // phone, and turns that stream a canned answer (a message with "slowly" in it
-// streams long enough to be stopped). Opens one pairing, writes the relay config and the typed key to a
+// streams long enough to be stopped; one with "approval" in it waits for a
+// card first, which "the desktop answers" has the desktop deny). Opens one pairing, writes the relay config and the typed key to a
 // fixture file, confirms the phone's claim once MAC_P verifies, then serves
 // the channel until the phone unpairs. Node 24, nothing to install.
 //
@@ -43,8 +44,36 @@ const CHATS = [
 ];
 /** What a turn answers, streamed in pieces: prose, a code block, non-ASCII text. */
 const ANSWER = 'Here are the notes for **1.4**:\n\n```sh\nnpm run release -- 1.4.0\n```\n\nGrüße aus Snotra — fertig.';
+/** The open approval cards, by request id, each with the turn that waits for it. */
+const cards = new Map();
+let cardCount = 0;
 const emit = (activity) => { for (const listener of desktopState.listeners) listener(activity); };
 const run = (chatId, runId, type, payload) => emit({ kind: 'run', chatId, runId, type, payload });
+
+/** A card for a shell command, as the window's DTO; the turn goes on with the answer. */
+function raiseCard(chatId, resume) {
+  const requestId = `a-${++cardCount}`;
+  const dto = {
+    contractVersion: 1, requestId, chatId, tool: 'run_command', riskClasses: ['shell'],
+    targets: [{ path: `${SNOTRA}/scripts/release.sh`, kind: 'file', exists: true }],
+    reason: 'Runs a shell command in the workspace.', checkpoint: 'tool', mode: 'smart', sessionAllowed: false,
+    preview: { kind: 'shell', text: 'npm run release -- 1.4.0', truncated: false, masked: false },
+  };
+  cards.set(requestId, { dto, resume });
+  emit({ kind: 'approval', type: 'request', chatId, dto });
+  console.log(`desktop: card ${requestId} in ${chatId}`);
+  return requestId;
+}
+
+function settle(requestId, response, by) {
+  const card = cards.get(requestId);
+  if (!card) return false;
+  cards.delete(requestId);
+  emit({ kind: 'approval', type: 'resolved', requestId, chatId: card.dto.chatId, response, invalidated: false, reason: null, by });
+  console.log(`desktop: card ${requestId} ${response} by ${by.kind}`);
+  card.resume(response);
+  return true;
+}
 
 /** A turn that streams its answer; `slow` ones take long enough to be stopped. */
 function startTurn({ chatId, text, runId }) {
@@ -60,6 +89,7 @@ function startTurn({ chatId, text, runId }) {
   const pieces = text.includes('slowly') ? Array.from({ length: 200 }, (_, i) => `word${i} `) : ANSWER.match(/.{1,12}/gs);
   let streamed = '';
   let step = 0;
+  let timer;
   const finish = (interrupted) => {
     clearInterval(timer);
     desktopState.turns.delete(chatId);
@@ -69,7 +99,7 @@ function startTurn({ chatId, text, runId }) {
     run(chatId, runId, 'progress', { type: 'run-end' });
     console.log(`desktop: turn in ${chatId} ${interrupted ? 'stopped' : 'done'}`);
   };
-  const timer = setInterval(() => {
+  const begin = () => { timer = setInterval(() => {
     if (step === 0) run(chatId, runId, 'tool-line', { callIndex: 0, phase: 'start', tool: 'read_file', line: 'Reading CHANGELOG.md' });
     if (step === 1) run(chatId, runId, 'tool-line', { callIndex: 0, phase: 'done', tool: 'read_file', line: 'Read CHANGELOG.md' });
     const piece = pieces[step];
@@ -77,7 +107,18 @@ function startTurn({ chatId, text, runId }) {
     streamed += piece;
     run(chatId, runId, 'delta', { text: piece });
     step += 1;
-  }, 60);
+  }, 60); };
+  if (text.includes('approval') || text.includes('the desktop answers')) {
+    const requestId = raiseCard(chatId, (response) => {
+      if (response !== 'deny') return begin();
+      streamed = 'Not run: denied.';
+      run(chatId, runId, 'delta', { text: streamed });
+      finish(false);
+    });
+    if (text.includes('the desktop answers')) setTimeout(() => settle(requestId, 'deny', { kind: 'desktop' }), 1500);
+  } else {
+    begin();
+  }
   desktopState.turns.set(chatId, () => finish(true));
   console.log(`desktop: turn in ${chatId} started`);
   return Promise.resolve({ ok: true });
@@ -90,9 +131,14 @@ const desktop = {
     .map(({ chatId, root, title, updatedAt, messages }) => ({ chatId, root, title, updatedAt, messageCount: messages.length })),
   loadChat: async (chatId) => structuredClone(CHATS.find((c) => c.chatId === chatId && c.messages.length > 0) ?? null),
   runningChats: () => desktopState.running,
-  awaitingApproval: () => new Set(),
-  pendingApprovals: () => [],
-  respondToApproval: () => ({ ok: false, reason: 'not-found' }),
+  awaitingApproval: () => new Set([...cards.values()].map((card) => card.dto.chatId)),
+  pendingApprovals: () => [...cards.values()].map((card) => card.dto),
+  respondToApproval: (requestId, { response }, by) => {
+    if (!cards.has(requestId)) return { ok: false, reason: 'not-found' };
+    if (response !== 'allow-once' && response !== 'deny') return { ok: false, reason: 'refused' };
+    settle(requestId, response, by);
+    return { ok: true, response };
+  },
   subscribe: (listener) => { desktopState.listeners.add(listener); return () => desktopState.listeners.delete(listener); },
   startTurn,
   stopChat: (chatId) => {
