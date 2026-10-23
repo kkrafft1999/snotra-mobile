@@ -72,8 +72,9 @@ struct RemoteModelTests {
         model.activate()
         await model.unpair()
         #expect(deletedChannel)
+        // The relay's endpoint (§5.8), not the database's: the phone's presence is deleted there as well.
         let delete = relay.requests.first {
-            $0.httpMethod == "DELETE" && $0.url!.path.contains("/channels/")
+            $0.httpMethod == "DELETE" && $0.url!.path.hasSuffix("/channels/\(relay.channelId.base64URLEncodedString)")
         }
         #expect(delete?.value(forHTTPHeaderField: "Authorization")?.hasPrefix("Bearer id-") == true)
         #expect(forgotten)
