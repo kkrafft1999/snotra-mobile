@@ -53,9 +53,16 @@ Signing is automatic, with the Apple team kept out of the repository:
 
 For a phone that cannot turn on Developer Mode (one managed by an MDM, for
 example), the app goes out through TestFlight. The App Store Connect record
-exists (bundle id `dev.snotra-ai.mobile`); the build is signed at export with
-the team from `Config/Signing.local.xcconfig`, so no registered device is
-needed.
+exists (bundle id `dev.snotra-ai.mobile`). The script signs with the team from
+`Config/Signing.local.xcconfig`: the archive with Apple Development, so it
+carries the entitlements (App Attest), the export again for App Store Connect.
+
+The archive's development profile needs at least one device registered in the
+team. The phone does not have to be connected or in Developer Mode for that:
+add its UDID under *Certificates, Identifiers & Profiles › Devices* (Xcode shows
+it in *Devices and Simulators*, or `xcrun devicectl list devices`). The first
+run asks once for access to the signing key in the keychain; run the script in
+a terminal of your own then, so the prompt can appear (*Always Allow*).
 
 1. Raise `CURRENT_PROJECT_VERSION` in the project — App Store Connect takes each
    build number once.

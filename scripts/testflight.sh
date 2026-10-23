@@ -1,8 +1,10 @@
 #!/bin/sh
 # Builds an archive and exports it for App Store Connect; with --upload it also
-# sends the build to TestFlight. Signing happens at export, with the team from
-# Config/Signing.local.xcconfig and the Apple account signed in to Xcode, so no
-# registered device is needed. Bump CURRENT_PROJECT_VERSION before every upload.
+# sends the build to TestFlight. Both steps sign automatically, with the team from
+# Config/Signing.local.xcconfig and the Apple account signed in to Xcode: the
+# archive with Apple Development, so it carries the entitlements (App Attest,
+# #59), the export again for App Store Connect. Bump CURRENT_PROJECT_VERSION
+# before every upload.
 set -eu
 cd "$(dirname "$0")/.."
 
@@ -55,7 +57,7 @@ PLIST
 
 xcodebuild archive -project SnotraMobile.xcodeproj -scheme SnotraMobile \
   -destination 'generic/platform=iOS' -archivePath "$out/SnotraMobile.xcarchive" \
-  CODE_SIGNING_ALLOWED=NO
+  -allowProvisioningUpdates DEVELOPMENT_TEAM="$team"
 
 xcodebuild -exportArchive -archivePath "$out/SnotraMobile.xcarchive" \
   -exportOptionsPlist "$out/ExportOptions.plist" -exportPath "$out" \
