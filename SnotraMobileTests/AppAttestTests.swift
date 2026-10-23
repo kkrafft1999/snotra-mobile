@@ -211,14 +211,6 @@ final class LockedStore: SecretStore, @unchecked Sendable {
     func delete(_ account: String) { lock.withLock { items[account] = nil } }
 }
 
-final class TestClock: @unchecked Sendable {
-    private let lock = NSLock()
-    private var _now = Date(timeIntervalSince1970: 1_000_000)
-
-    var now: Date { lock.withLock { _now } }
-    func advance(by seconds: TimeInterval) { lock.withLock { _now += seconds } }
-}
-
 /// Hands out `reusable-n` and `limited-n`, and records which was asked for.
 final class RecordingAppCheck: AppCheckProvider, @unchecked Sendable {
     private let lock = NSLock()
