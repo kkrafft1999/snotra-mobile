@@ -4,12 +4,18 @@ import Testing
 
 struct RemoteSessionTests {
     let desktop = FakeDesktop()
-    let fast = RemoteSession.Timing(
-        handshake: .milliseconds(300), gap: .milliseconds(150), call: .seconds(5), retry: .milliseconds(10))
+    /// Timers that never run out on their own during a test, however slow the
+    /// runner (#48): a CI simulator can take longer than a few hundred
+    /// milliseconds for a handshake, and a timer that fires then starts a
+    /// session over that the test expects to stand. Nothing waits for these
+    /// timers — a test ends as soon as what it waits for is there. A test about
+    /// one timer shortens only that one.
+    let steady = RemoteSession.Timing(
+        handshake: .seconds(30), gap: .seconds(30), call: .seconds(30), retry: .milliseconds(10))
 
     /// A session whose channel stands with the desktop online and its handshake stream read.
     func connected(timing: RemoteSession.Timing? = nil) async -> (RemoteSession, SessionLog) {
-        let session = await desktop.makeSession(timing: timing ?? fast)
+        let session = await desktop.makeSession(timing: timing ?? steady)
         let log = SessionLog(session)
         await session.receive(.state(.connected(desktopOnline: true)))
         await session.receive(.desktopHandshake(.null))
@@ -17,7 +23,7 @@ struct RemoteSessionTests {
     }
 
     @Test func waitsForTheDesktopsHandshakeRecordBeforeOffering() async throws {
-        let session = await desktop.makeSession(timing: fast)
+        let session = await desktop.makeSession(timing: steady)
         let log = SessionLog(session)
         await session.receive(.state(.connected(desktopOnline: true)))
         try await Task.sleep(for: .milliseconds(50))
@@ -90,7 +96,9 @@ struct RemoteSessionTests {
     }
 
     @Test func aGapThatStaysOpenStartsOver() async throws {
-        let (session, log) = await connected()
+        var timing = steady
+        timing.gap = .milliseconds(150)
+        let (session, log) = await connected(timing: timing)
         #expect(await log.waitForReady())
         await desktop.notifyLeavingAGap("state", .object([:]))
         // §16: the gap is not filled within its time, so the phone starts a new handshake.
@@ -113,7 +121,7 @@ struct RemoteSessionTests {
 
     @Test func aStaleAnswerIsNotTakenForTheNewOne() async throws {
         await desktop.set(answersHandshakes: false)
-        let session = await desktop.makeSession(timing: fast)
+        let session = await desktop.makeSession(timing: steady)
         let log = SessionLog(session)
         // Handshake 2 of an earlier session is still in the desktop's record.
         let stale = JSONValue.object(["v": 1, "e": .string(Data(repeating: 5, count: 32).base64URLEncodedString)])
@@ -128,7 +136,10 @@ struct RemoteSessionTests {
 
     @Test func threeFailedHandshakesWithinAMinuteStop() async throws {
         await desktop.set(answersHandshakes: false)
-        let (session, log) = await connected()
+        // The desktop never answers here, so a short handshake cannot cut one off that would have succeeded.
+        var timing = steady
+        timing.handshake = .milliseconds(300)
+        let (session, log) = await connected(timing: timing)
         #expect(await log.waitFor(.failed))
         #expect(await desktop.handshakes == 3)
         await #expect(throws: RemoteCallError.notConnected) { try await session.call("workspaces.list") }
