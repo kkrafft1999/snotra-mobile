@@ -142,4 +142,25 @@ final class EventLog: @unchecked Sendable {
     func waitFor(_ state: RelayConnectionState, within seconds: Double = patience) async -> Bool {
         await waitFor(within: seconds) { $0 == .state(state) }
     }
+
+    /// Whether `state` shows up after the first `count` states — a change back,
+    /// not the same state reported earlier.
+    func waitFor(_ state: RelayConnectionState, after count: Int, within seconds: Double = patience) async -> Bool {
+        let deadline = Date().addingTimeInterval(seconds)
+        while Date() < deadline {
+            if states.dropFirst(count).contains(state) { return true }
+            try? await Task.sleep(for: .milliseconds(10))
+        }
+        return false
+    }
+}
+
+/// A clock that moves only when the test moves it, for `RelayClient.now`: what
+/// ages on it cannot age because the runner is slow (#50).
+final class TestClock: @unchecked Sendable {
+    private let lock = NSLock()
+    private var current = Date()
+
+    var now: Date { lock.withLock { current } }
+    func advance(by seconds: TimeInterval) { lock.withLock { current += seconds } }
 }
