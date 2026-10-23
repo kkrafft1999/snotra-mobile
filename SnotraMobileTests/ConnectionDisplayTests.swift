@@ -7,10 +7,24 @@ struct ConnectionDisplayTests {
     @Test func eachChannelStateHasItsScreen() {
         #expect(ConnectionDisplay(nil, networkAvailable: true) == .connecting)
         #expect(ConnectionDisplay(.connecting, networkAvailable: true) == .connecting)
-        #expect(ConnectionDisplay(.connected(desktopOnline: true), networkAvailable: true) == .connected)
+        #expect(ConnectionDisplay(.connected(desktopOnline: true), networkAvailable: true) == .connecting)
         #expect(ConnectionDisplay(.connected(desktopOnline: false), networkAvailable: true) == .desktopOffline)
         #expect(ConnectionDisplay(.unreachable, networkAvailable: true) == .relayUnreachable)
         #expect(ConnectionDisplay(.ended, networkAvailable: true) == .connecting)
+    }
+
+    @Test func withTheDesktopOnlineTheSessionDecides() {
+        let welcome = SessionHello.Welcome(protocolVersion: 1, connectionId: "c", methods: [])
+        let online = RelayConnectionState.connected(desktopOnline: true)
+        #expect(ConnectionDisplay(online, session: .idle, networkAvailable: true) == .connecting)
+        #expect(ConnectionDisplay(online, session: .handshaking, networkAvailable: true) == .connecting)
+        #expect(ConnectionDisplay(online, session: .ready(welcome), networkAvailable: true) == .connected)
+        #expect(ConnectionDisplay(online, session: .failed, networkAvailable: true) == .cannotConnect)
+        #expect(ConnectionDisplay(online, session: .incompatible(updateApp: true), networkAvailable: true) == .updateApp)
+        #expect(ConnectionDisplay(online, session: .incompatible(updateApp: false), networkAvailable: true) == .updateDesktop)
+        // A session the channel no longer carries counts for nothing.
+        #expect(ConnectionDisplay(.connected(desktopOnline: false), session: .ready(welcome), networkAvailable: true) == .desktopOffline)
+        #expect(ConnectionDisplay(.unreachable, session: .ready(welcome), networkAvailable: true) == .relayUnreachable)
     }
 
     @Test func noNetworkWinsOverWhatTheChannelLastSaid() {

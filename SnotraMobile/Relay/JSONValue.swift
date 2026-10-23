@@ -80,3 +80,9 @@ enum JSONValue: Equatable, Sendable {
         return kept.isEmpty ? .null : .object(kept)
     }
 }
+
+extension JSONValue: ExpressibleByStringLiteral, ExpressibleByIntegerLiteral, ExpressibleByBooleanLiteral {
+    init(stringLiteral value: String) { self = .string(value) }
+    init(integerLiteral value: Int) { self = .number(Double(value)) }
+    init(booleanLiteral value: Bool) { self = .bool(value) }
+}
