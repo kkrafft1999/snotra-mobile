@@ -22,7 +22,16 @@ struct MirrorSnapshots {
         }
         await empty.sessionStarted()
 
+        // A chat with a turn running: its tool line and the first words of the answer.
+        let running = mirror.chat(ChatRoute(chatId: "c1", workspaceId: "w1"))
+        mirror.attach(running)
+        await running.open()
+        running.apply("chat.tool-line", .object(["chatId": "c1", "runId": "r1", "callIndex": 0, "phase": "start", "tool": "shell", "line": "Running git log --grep fix"]))
+        running.apply("chat.delta", .object(["chatId": "c1", "runId": "r1", "text": "Three fixes went in since 1.3:\n\n- the sandbox"]))
+
         let screens: [(String, AnyView)] = [
+            ("chat-running", AnyView(NavigationStack { ChatView(mirror: mirror, route: ChatRoute(chatId: "c1", workspaceId: "w1")) })),
+            ("chat-other-workspace", AnyView(NavigationStack { ChatView(mirror: mirror, route: ChatRoute(chatId: "c9", workspaceId: "w2")) })),
             ("workspaces", AnyView(WorkspacesView(mirror: mirror))),
             ("workspaces-empty", AnyView(WorkspacesView(mirror: empty))),
             ("chats", AnyView(NavigationStack { ChatsView(mirror: mirror, workspaceId: "w2") })),

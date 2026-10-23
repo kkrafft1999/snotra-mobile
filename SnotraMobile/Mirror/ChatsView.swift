@@ -6,6 +6,8 @@ struct ChatsView: View {
     let mirror: DesktopMirror
     let workspaceId: DesktopMirror.Workspace.ID
     @State private var refusal: DesktopMirror.SwitchRefusal?
+    @State private var newChat: ChatRoute?
+    @State private var newChatFailed = false
 
     var body: some View {
         Group {
@@ -23,6 +25,30 @@ struct ChatsView: View {
         .scrollContentBackground(.hidden)
         .background(Color.background)
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button("New chat", systemImage: "square.and.pencil") {
+                    Task {
+                        do throws(RemoteCallError) {
+                            newChat = try await mirror.newChat(in: workspaceId)
+                        } catch {
+                            newChatFailed = true
+                        }
+                    }
+                }
+                // A new chat is kept under the workspace open at the desktop (§8.1 `chat.new`).
+                .disabled(mirror.activeWorkspaceId != workspaceId)
+                .accessibilityIdentifier("chat.new")
+            }
+        }
+        .navigationDestination(item: $newChat) { route in
+            ChatView(mirror: mirror, route: route)
+        }
+        .alert("Couldn't start a new chat", isPresented: $newChatFailed) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("Snotra on your desktop didn't answer in time, or has another workspace open now.")
+        }
         .task { await mirror.refreshChats(workspaceId) }
         .refreshable { await mirror.refreshChats(workspaceId) }
         .alert(refusalTitle, isPresented: Binding(get: { refusal != nil }, set: { if !$0 { refusal = nil } })) {
@@ -74,14 +100,16 @@ struct ChatsView: View {
                 ContentUnavailableView {
                     Label("No chats yet", systemImage: "bubble.left.and.bubble.right")
                 } description: {
-                    Text("Chats you start in this workspace on your desktop appear here.")
+                    Text("Start one here or on your desktop; the chats of this workspace appear here.")
                 }
                 .listRowBackground(Color.clear)
                 .accessibilityIdentifier("chats.empty")
             case .loaded(let chats):
                 Section("Chats") {
                     ForEach(chats) { chat in
-                        ChatRow(chat: chat, state: mirror.state(of: chat))
+                        NavigationLink(value: ChatRoute(chatId: chat.chatId, workspaceId: workspaceId, title: chat.title)) {
+                            ChatRow(chat: chat, state: mirror.state(of: chat))
+                        }
                     }
                 }
                 .accessibilityIdentifier("chats")
@@ -173,6 +201,16 @@ extension DesktopMirror {
                              "messageCount": 4, "state": "needs-approval"]),
                     .object(["chatId": "c3", "title": "Tidy up the README", "updatedAt": .number(now - 86_400_000 * 3),
                              "messageCount": 1, "state": "idle"]),
+                ])])
+            case "chat.open":
+                return .object(["chatId": "c1", "title": "Release notes for 1.4", "state": "idle", "messages": .array([
+                    .object(["messageId": "m0", "role": "user", "text": "Write the release notes for 1.4, short."]),
+                    .object(["messageId": "m1", "role": "assistant",
+                             "text": "## Snotra 1.4\n\nTwo things stand out: **remote access** from the iPhone, and a faster `git` sandbox.\n\n```sh\nnpm run release -- 1.4.0 --notes CHANGELOG.md\n```\n\nShall I add the fixes as well?",
+                             "toolLines": .array([.object(["line": "Read CHANGELOG.md", "tool": "read_file", "status": "done"]),
+                                                  .object(["line": "Ran git log --oneline v1.3.0..", "tool": "shell", "status": "done"])])]),
+                    .object(["messageId": "m2", "role": "user", "text": "Yes, add them.",
+                             "origin": .object(["kind": "relay", "client": "Snotra for iPhone"])]),
                 ])])
             default:
                 return .object([:])

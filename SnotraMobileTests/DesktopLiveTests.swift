@@ -4,7 +4,8 @@ import Testing
 
 /// The app against Snotra's own desktop half of the channel — its
 /// `remote-channel.js` and `remote-dispatcher.js`, behind the relay stand-in —
-/// from pairing to the workspace switch. Off unless
+/// from pairing through a followed, a stopped and a new chat to the workspace
+/// switch. Off unless
 /// `SNOTRA_DESKTOP_HARNESS` (`TEST_RUNNER_SNOTRA_DESKTOP_HARNESS` for
 /// `xcodebuild test`) names the file `scripts/desktop-harness.js` wrote: the
 /// relay's configuration and the key to type. CI does not run it.
@@ -15,7 +16,7 @@ import Testing
 @Suite(.enabled(if: DesktopHarness.fixture != nil))
 @MainActor
 struct DesktopLiveTests {
-    @Test func pairsShakesHandsListsAndSwitches() async throws {
+    @Test func pairsFollowsWritesAndSwitches() async throws {
         let fixture = try #require(DesktopHarness.fixture)
         let endpoint = fixture.endpoint
         let transport = URLSessionTransport()
@@ -50,6 +51,41 @@ struct DesktopLiveTests {
         #expect(chats.map(\.title) == ["Release notes for 1.4", "Why does the sandbox refuse git push?"])
         #expect(chats.first?.messageCount == 12)
 
+        // #38: open a chat and follow a turn as it streams; the stored answer replaces the assembled one.
+        let chat = mirror.chat(ChatRoute(chatId: chats[0].chatId, workspaceId: snotra.id, title: chats[0].title))
+        mirror.attach(chat)
+        await chat.open()
+        #expect(chat.transcript.messages.count == 12)
+        #expect(await chat.send("Write the release notes") == nil)
+        var sawLive = false
+        for _ in 0..<200 where chat.transcript.isRunning || chat.transcript.hasProvisionalAnswer {
+            if chat.transcript.live?.text.isEmpty == false { sawLive = true }
+            try await Task.sleep(for: .milliseconds(25))
+        }
+        #expect(sawLive)
+        #expect(chat.transcript.messages.count == 14)
+        #expect(chat.transcript.messages.last?.text == Self.answer)
+        #expect(chat.transcript.messages.last?.toolLines.map(\.line) == ["Read CHANGELOG.md"])
+
+        // A turn stopped from the phone (`run.abort`).
+        #expect(await chat.send("Explain it slowly") == nil)
+        for _ in 0..<200 where chat.transcript.live?.text.isEmpty != false { try await Task.sleep(for: .milliseconds(25)) }
+        await chat.stop()
+        for _ in 0..<200 where chat.transcript.isRunning || chat.transcript.hasProvisionalAnswer { try await Task.sleep(for: .milliseconds(25)) }
+        #expect(chat.transcript.messages.last?.interrupted == true)
+        mirror.detach(chat)
+        await chat.close()
+
+        // A new chat: nothing at the desktop until its first question, then opened and followed.
+        let route = try await mirror.newChat(in: snotra.id)
+        let fresh = mirror.chat(route)
+        mirror.attach(fresh)
+        #expect(await fresh.send("Hello") == nil)
+        for _ in 0..<200 where fresh.transcript.isRunning || fresh.transcript.hasProvisionalAnswer { try await Task.sleep(for: .milliseconds(25)) }
+        #expect(fresh.transcript.messages.map(\.role) == [.user, .assistant])
+        #expect(fresh.transcript.messages.last?.text == Self.answer)
+        mirror.detach(fresh)
+
         // The switch (`workspace.activate`), and the desktop's `state` that follows it.
         #expect(await mirror.activate(website.id) == nil)
         #expect(mirror.activeWorkspaceId == website.id)
@@ -65,6 +101,9 @@ struct DesktopLiveTests {
         await model.unpair()
         #expect(model.pairing == nil)
     }
+
+    /// What the harness's turns answer.
+    static let answer = "Here are the notes for **1.4**:\n\n```sh\nnpm run release -- 1.4.0\n```\n\nGrüße aus Snotra — fertig."
 
     private func isPaired(_ step: PairingFlow.Step) -> Bool {
         if case .paired = step { true } else { false }

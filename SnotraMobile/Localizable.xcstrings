@@ -1,6 +1,16 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "%@ — open it on your desktop" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ – öffne es auf deinem Desktop"
+          }
+        }
+      }
+    },
     "%lld messages" : {
       "localizations" : {
         "en" : {
@@ -61,6 +71,16 @@
         }
       }
     },
+    "Ask something. Snotra on your desktop answers in this workspace." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Frag etwas. Snotra auf deinem Desktop antwortet in diesem Workspace."
+          }
+        }
+      }
+    },
     "Camera" : {
       "localizations" : {
         "de" : {
@@ -91,22 +111,22 @@
         }
       }
     },
+    "Chat not available" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chat nicht verfügbar"
+          }
+        }
+      }
+    },
     "Chats" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Chats"
-          }
-        }
-      }
-    },
-    "Chats you start in this workspace on your desktop appear here." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Chats, die du auf deinem Desktop in diesem Workspace beginnst, erscheinen hier."
           }
         }
       }
@@ -211,6 +231,26 @@
         }
       }
     },
+    "Couldn't open the chat" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Chat ließ sich nicht öffnen"
+          }
+        }
+      }
+    },
+    "Couldn't start a new chat" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein neuer Chat ließ sich nicht anlegen"
+          }
+        }
+      }
+    },
     "Couldn't switch the workspace" : {
       "localizations" : {
         "de" : {
@@ -251,12 +291,32 @@
         }
       }
     },
+    "From your phone" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Von deinem Handy"
+          }
+        }
+      }
+    },
     "Hidden while your screen is shared" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ausgeblendet, solange dein Bildschirm geteilt wird"
+          }
+        }
+      }
+    },
+    "Image — open it on your desktop" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bild – öffne es auf deinem Desktop"
           }
         }
       }
@@ -301,12 +361,32 @@
         }
       }
     },
+    "Message" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nachricht"
+          }
+        }
+      }
+    },
     "More" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mehr"
+          }
+        }
+      }
+    },
+    "New chat" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neuer Chat"
           }
         }
       }
@@ -337,6 +417,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nicht mehr für dieses iPhone geöffnet"
+          }
+        }
+      }
+    },
+    "No model set up on your desktop" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kein Modell auf deinem Desktop eingerichtet"
           }
         }
       }
@@ -377,6 +467,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "OK"
+          }
+        }
+      }
+    },
+    "Open" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öffnen"
           }
         }
       }
@@ -511,6 +611,46 @@
         }
       }
     },
+    "Send" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Senden"
+          }
+        }
+      }
+    },
+    "Shorten it and send it again." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kürze sie und sende sie noch einmal."
+          }
+        }
+      }
+    },
+    "Show earlier messages" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Frühere Nachrichten anzeigen"
+          }
+        }
+      }
+    },
+    "Snotra is still working on this chat" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snotra arbeitet noch an diesem Chat"
+          }
+        }
+      }
+    },
     "Snotra on your desktop can no longer reach it. To use it again, pair it anew." : {
       "localizations" : {
         "de" : {
@@ -541,6 +681,16 @@
         }
       }
     },
+    "Snotra on your desktop didn't answer in time, or has another workspace open now." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snotra auf deinem Desktop hat nicht rechtzeitig geantwortet oder hat jetzt einen anderen Workspace geöffnet."
+          }
+        }
+      }
+    },
     "Snotra on your desktop didn't answer in time." : {
       "localizations" : {
         "de" : {
@@ -561,12 +711,32 @@
         }
       }
     },
+    "Snotra on your desktop didn't confirm it in time. Send it again; it won't be asked twice." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snotra auf deinem Desktop hat sie nicht rechtzeitig bestätigt. Sende sie noch einmal – doppelt gefragt wird nicht."
+          }
+        }
+      }
+    },
     "Snotra on your desktop didn't switch in time. Try again in a moment." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Snotra auf deinem Desktop hat nicht rechtzeitig gewechselt. Versuch es gleich noch einmal."
+          }
+        }
+      }
+    },
+    "Snotra on your desktop has no provider set up for this chat's model. Set one up there." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snotra auf deinem Desktop hat für das Modell dieses Chats keinen Anbieter eingerichtet. Richte dort einen ein."
           }
         }
       }
@@ -631,6 +801,16 @@
         }
       }
     },
+    "Start one here or on your desktop; the chats of this workspace appear here." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beginne einen hier oder auf deinem Desktop – die Chats dieses Workspaces erscheinen hier."
+          }
+        }
+      }
+    },
     "Start pairing" : {
       "localizations" : {
         "de" : {
@@ -647,6 +827,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Starte das Koppeln auf deinem Desktop neu, um einen neuen Code zu bekommen."
+          }
+        }
+      }
+    },
+    "Stop" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stoppen"
+          }
+        }
+      }
+    },
+    "Stopped" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gestoppt"
           }
         }
       }
@@ -701,6 +901,26 @@
         }
       }
     },
+    "The message didn't go out" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Nachricht ging nicht raus"
+          }
+        }
+      }
+    },
+    "The message is too long" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Nachricht ist zu lang"
+          }
+        }
+      }
+    },
     "The pairing was denied or cancelled on your desktop." : {
       "localizations" : {
         "de" : {
@@ -717,6 +937,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Diese App spricht eine neuere Version der Verbindung als Snotra auf deinem Desktop. Aktualisiere Snotra dort und versuch es dann noch einmal."
+          }
+        }
+      }
+    },
+    "This chat has no messages yet." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dieser Chat hat noch keine Nachrichten."
+          }
+        }
+      }
+    },
+    "This chat no longer exists on your desktop, or its workspace is no longer open to your phone." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diesen Chat gibt es auf deinem Desktop nicht mehr, oder sein Workspace ist nicht mehr für dein Handy geöffnet."
           }
         }
       }
@@ -757,6 +997,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dieses iPhone ist jetzt mit Snotra auf deinem Desktop gekoppelt."
+          }
+        }
+      }
+    },
+    "To write here, open this workspace on your desktop." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Um hier zu schreiben, öffne diesen Workspace auf deinem Desktop."
           }
         }
       }
@@ -841,12 +1091,32 @@
         }
       }
     },
+    "Wait until the answer is done or stop it, then write again." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Warte, bis die Antwort fertig ist, oder stoppe sie, und schreib dann noch einmal."
+          }
+        }
+      }
+    },
     "Waiting for your approval" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Wartet auf deine Freigabe"
+          }
+        }
+      }
+    },
+    "Waiting for your approval on your desktop" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wartet auf deine Freigabe auf deinem Desktop"
           }
         }
       }
@@ -861,12 +1131,42 @@
         }
       }
     },
+    "Working on your desktop… New text appears here as it comes." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arbeitet auf deinem Desktop … Neuer Text erscheint hier, sobald er kommt."
+          }
+        }
+      }
+    },
+    "Working…" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arbeitet …"
+          }
+        }
+      }
+    },
     "Workspace not available" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Workspace nicht verfügbar"
+          }
+        }
+      }
+    },
+    "Workspace not open on your desktop" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Workspace auf deinem Desktop nicht geöffnet"
           }
         }
       }
@@ -887,6 +1187,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Deine Chats erscheinen hier, sobald die Verbindung steht."
+          }
+        }
+      }
+    },
+    "Your desktop has another workspace open. Open this one there first; its tools work in it." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auf deinem Desktop ist ein anderer Workspace geöffnet. Öffne zuerst diesen dort – seine Tools arbeiten darin."
           }
         }
       }
