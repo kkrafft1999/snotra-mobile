@@ -37,31 +37,39 @@ struct MirrorSnapshots {
             ("chats", AnyView(NavigationStack { ChatsView(mirror: mirror, workspaceId: "w2") })),
             ("chats-active", AnyView(NavigationStack { ChatsView(mirror: mirror, workspaceId: "w1") })),
         ]
-        let scene = try #require(UIApplication.shared.connectedScenes.first as? UIWindowScene)
-        let window = UIWindow(windowScene: scene)
-        window.frame = CGRect(x: 0, y: 0, width: 393, height: 852)
-        for (name, screen) in screens {
-            for (scheme, schemeName) in [(ColorScheme.light, "light"), (.dark, "dark")] {
-                for (size, sizeName) in [(DynamicTypeSize.large, "default"), (.accessibility3, "ax3")] {
-                    for language in ["en", "de"] {
-                        window.rootViewController = UIHostingController(rootView: screen
-                            .background(Color.background)
-                            .environment(\.colorScheme, scheme)
-                            .environment(\.dynamicTypeSize, size)
-                            .environment(\.locale, Locale(identifier: language)))
-                        window.overrideUserInterfaceStyle = scheme == .dark ? .dark : .light
-                        window.makeKeyAndVisible()
-                        // Long enough for `.task` to have read the chats and the list to have laid out.
-                        try await Task.sleep(for: .milliseconds(400))
-                        let image = UIGraphicsImageRenderer(bounds: window.bounds).image { _ in
-                            window.drawHierarchy(in: window.bounds, afterScreenUpdates: true)
-                        }
-                        try #require(image.pngData()).write(
-                            to: folder.appending(path: "mirror-\(name)-\(schemeName)-\(sizeName)-\(language).png"))
+        try await writeHostedSnapshots(screens, prefix: "mirror", to: folder)
+    }
+}
+
+/// Each screen hosted in a window, light and dark, at the default and the
+/// largest accessibility text size, in English and German, written as
+/// `<prefix>-<name>-<scheme>-<size>-<language>.png`.
+@MainActor
+func writeHostedSnapshots(_ screens: [(String, AnyView)], prefix: String, to folder: URL) async throws {
+    let scene = try #require(UIApplication.shared.connectedScenes.first as? UIWindowScene)
+    let window = UIWindow(windowScene: scene)
+    window.frame = CGRect(x: 0, y: 0, width: 393, height: 852)
+    for (name, screen) in screens {
+        for (scheme, schemeName) in [(ColorScheme.light, "light"), (.dark, "dark")] {
+            for (size, sizeName) in [(DynamicTypeSize.large, "default"), (.accessibility3, "ax3")] {
+                for language in ["en", "de"] {
+                    window.rootViewController = UIHostingController(rootView: screen
+                        .background(Color.background)
+                        .environment(\.colorScheme, scheme)
+                        .environment(\.dynamicTypeSize, size)
+                        .environment(\.locale, Locale(identifier: language)))
+                    window.overrideUserInterfaceStyle = scheme == .dark ? .dark : .light
+                    window.makeKeyAndVisible()
+                    // Long enough for `.task` to have read the chats and the list to have laid out.
+                    try await Task.sleep(for: .milliseconds(400))
+                    let image = UIGraphicsImageRenderer(bounds: window.bounds).image { _ in
+                        window.drawHierarchy(in: window.bounds, afterScreenUpdates: true)
                     }
+                    try #require(image.pngData()).write(
+                        to: folder.appending(path: "\(prefix)-\(name)-\(schemeName)-\(sizeName)-\(language).png"))
                 }
             }
         }
-        window.isHidden = true
     }
+    window.isHidden = true
 }
