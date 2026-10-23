@@ -90,6 +90,46 @@ struct RelayLiveTests {
         _ = try await post("channels/\(channelId.base64URLEncodedString)", method: "DELETE", body: nil, bearer: desktopToken)
     }
 
+    /// #35: *Disconnect* in the app, and the desktop sees its channel gone.
+    @MainActor @Test func disconnectingInTheAppEndsTheChannelForTheDesktop() async throws {
+        let (channelId, desktopToken) = try await pair()
+        let model = pairedModel(channelId: channelId)
+        model.activate()
+        for _ in 0..<100 where model.connection != .connected(desktopOnline: false) { try await Task.sleep(for: .milliseconds(100)) }
+        #expect(model.connection == .connected(desktopOnline: false))
+        await model.unpair()
+        #expect(model.pairing == nil)
+        #expect(try await get(channelId: channelId, node: "meta", token: desktopToken) == .null)
+    }
+
+    /// #35: *Remove phone* at the desktop, and the app notices.
+    @MainActor @Test func removingAtTheDesktopEndsThePairingInTheApp() async throws {
+        let (channelId, desktopToken) = try await pair()
+        let model = pairedModel(channelId: channelId)
+        model.activate()
+        for _ in 0..<100 where model.connection != .connected(desktopOnline: false) { try await Task.sleep(for: .milliseconds(100)) }
+        _ = try await post("channels/\(channelId.base64URLEncodedString)", method: "DELETE", body: nil, bearer: desktopToken)
+        for _ in 0..<100 where model.notice == nil { try await Task.sleep(for: .milliseconds(100)) }
+        #expect(model.notice == .removedAtDesktop)
+        #expect(model.pairing == nil)
+    }
+
+    /// An app that holds the keys `pair()` claimed with.
+    @MainActor private func pairedModel(channelId: Data) -> RemoteModel {
+        let keys = MemoryStore()
+        keys.items[DeviceKeyStore.signAccount] = phoneSign.rawRepresentation
+        keys.items[DeviceKeyStore.agreeAccount] = phoneAgree.rawRepresentation
+        let pairings = MemoryStore()
+        try? PairingStore(store: pairings).save(PairingRecord(
+            relayHost: endpoint.host, channelId: channelId,
+            desktopKeys: KeyBundle(sign: desktopSign.publicKey, agree: desktopAgree.publicKey)))
+        let model = RemoteModel(relays: [endpoint], transport: transport,
+                                keyStore: DeviceKeyStore(store: keys, kind: .software),
+                                pairingStore: PairingStore(store: pairings))
+        model.reload()
+        return model
+    }
+
     private func isPaired(_ step: PairingFlow.Step) -> Bool {
         if case .paired = step { true } else { false }
     }
