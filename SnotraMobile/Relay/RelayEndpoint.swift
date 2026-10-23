@@ -11,11 +11,25 @@ struct RelayEndpoint: Sendable, Equatable {
     /// The database; the emulator's carries `?ns=<instance>`, and node paths go before that query.
     let databaseURL: URL
     let identityToolkitURL: URL
-    /// The project's web API key — public, it names the project to the Identity Toolkit.
+    /// The project's web API key — it names the project to the Identity Toolkit.
     let apiKey: String
-    /// Sent as `X-Firebase-AppCheck` on the phone's calls. App Attest takes its
-    /// place against production (#40); until then only the emulator's value exists.
-    let appCheckToken: String
+    /// A fixed `X-Firebase-AppCheck` value, which only the emulator accepts.
+    /// Production has none: its tokens come from App Attest (#51).
+    let appCheckToken: String?
+    /// The iOS app's resource in App Check's REST API, which exchanges App
+    /// Attest's attestations and assertions for tokens (#51). Production only.
+    let appCheckAppURL: URL?
+
+    init(host: String, relayURL: URL, databaseURL: URL, identityToolkitURL: URL, apiKey: String,
+         appCheckToken: String? = nil, appCheckAppURL: URL? = nil) {
+        self.host = host
+        self.relayURL = relayURL
+        self.databaseURL = databaseURL
+        self.identityToolkitURL = identityToolkitURL
+        self.apiKey = apiKey
+        self.appCheckToken = appCheckToken
+        self.appCheckAppURL = appCheckAppURL
+    }
 
     /// The Firebase emulator of snotra-promotion (`docs/relay.md`, *Local
     /// preview*) on this Mac. The simulator reaches it at 127.0.0.1, which App
@@ -28,14 +42,33 @@ struct RelayEndpoint: Sendable, Equatable {
         apiKey: "emulator-api-key",
         appCheckToken: "emulator-app-check")
 
+    /// The production relay of the Firebase project `snotra-ai` (snotra#1193).
+    /// Its addresses are public; the API key and the iOS app's Firebase app ID
+    /// (`1:<project number>:ios:<hash>`) come in at build time and stay out of
+    /// the repository, as the desktop's key does (snotra#1211).
+    static func production(apiKey: String, firebaseAppId: String) -> RelayEndpoint {
+        RelayEndpoint(
+            host: "relay.snotra-ai.dev",
+            relayURL: URL(string: "https://relay.snotra-ai.dev/v1")!,
+            databaseURL: URL(string: "https://snotra-ai-relay.europe-west1.firebasedatabase.app/")!,
+            identityToolkitURL: URL(string: "https://identitytoolkit.googleapis.com/v1")!,
+            apiKey: apiKey,
+            appCheckAppURL: URL(string: "https://firebaseappcheck.googleapis.com/v1/projects/snotra-ai/apps")!
+                .appending(path: firebaseAppId))
+    }
+
     /// The relays this build ships with (§4): a QR code that names any other host
-    /// is refused, and a typed key goes to the first. The emulator only in debug
-    /// builds; the production relay joins with #40.
+    /// is refused, and a typed key goes to the first. Debug builds know the
+    /// emulator, release builds production and nothing else.
     static var builtIn: [RelayEndpoint] {
         #if DEBUG
         [.emulator]
         #else
-        []
+        // `ProductionRelayConfiguration` lives in `ProductionRelay.local.swift`,
+        // which git ignores and `scripts/testflight.sh` writes. A release build
+        // without it does not compile — it would know no relay at all.
+        [.production(apiKey: ProductionRelayConfiguration.apiKey,
+                     firebaseAppId: ProductionRelayConfiguration.firebaseAppId)]
         #endif
     }
 
@@ -49,5 +82,18 @@ struct RelayEndpoint: Sendable, Equatable {
         if silent { items.append(URLQueryItem(name: "print", value: "silent")) }
         components.queryItems = items
         return components.url!
+    }
+
+    /// `…/v1/accounts:{method}?key=<API key>`, a call of the Identity Toolkit.
+    func accountsURL(_ method: String) -> URL {
+        identityToolkitURL.appending(path: "accounts:\(method)")
+            .appending(queryItems: [URLQueryItem(name: "key", value: apiKey)])
+    }
+
+    /// `…/apps/{app ID}:{method}`, a call of App Check's REST API such as
+    /// `exchangeAppAttestAttestation`; `nil` where the relay takes a fixed token.
+    func appCheckURL(_ method: String) -> URL? {
+        guard let appCheckAppURL else { return nil }
+        return URL(string: appCheckAppURL.absoluteString + ":" + method)
     }
 }

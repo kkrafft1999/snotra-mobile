@@ -50,8 +50,7 @@ struct RelayClient: Sendable {
     /// §5.1: the relay's custom token becomes an ID token through the Identity Toolkit.
     func signIn(customToken: String, serverDate: Date? = nil) async throws -> Session {
         guard !customToken.isEmpty, customToken.count <= Self.maxTokenChars else { throw RelayError.invalidResponse }
-        var url = endpoint.identityToolkitURL.appending(path: "accounts:signInWithCustomToken")
-        url.append(queryItems: [URLQueryItem(name: "key", value: endpoint.apiKey)])
+        let url = endpoint.accountsURL("signInWithCustomToken")
         let started = now()
         let (answer, _) = try await call(url, body: .object([
             "token": .string(customToken),
@@ -77,7 +76,7 @@ struct RelayClient: Sendable {
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
             request.httpBody = try body.data()
         }
-        if appCheck { request.setValue(endpoint.appCheckToken, forHTTPHeaderField: "X-Firebase-AppCheck") }
+        if appCheck, let token = endpoint.appCheckToken { request.setValue(token, forHTTPHeaderField: "X-Firebase-AppCheck") }
         if let bearer { request.setValue("Bearer \(bearer)", forHTTPHeaderField: "Authorization") }
         let (data, response) = try await transport.send(request)
         guard data.count <= Self.maxResponseBytes else { throw RelayError.invalidResponse }
