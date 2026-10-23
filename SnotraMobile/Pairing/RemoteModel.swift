@@ -72,6 +72,14 @@ final class RemoteModel {
         await channel?.stop()
     }
 
+    /// *Try now*, or the network came back: a fresh connection instead of
+    /// waiting out the channel's back-off.
+    func reconnect() async {
+        guard channel != nil else { return }
+        await deactivate()
+        activate()
+    }
+
     /// *Disconnect* (§5.8): the channel is deleted at the relay, so that the
     /// desktop hears of it, and the phone forgets the pairing and its keys. When
     /// the relay cannot be reached the phone forgets them all the same; the

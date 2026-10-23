@@ -51,6 +51,22 @@ struct RemoteModelTests {
         #expect(model.pairing != nil)
     }
 
+    @Test func tryNowOpensAFreshConnection() async {
+        relay.streams["meta"] = .init(text: FakeRelay.put("/", #"{"status":"paired"}"#))
+        model.activate()
+        #expect(await waitFor { model.connection == .connected(desktopOnline: false) })
+        await model.reconnect()
+        #expect(await waitFor { model.connection == .connected(desktopOnline: false) })
+        #expect(relay.tokensIssued == 2)
+        await model.deactivate()
+    }
+
+    @Test func tryNowDoesNothingInTheBackground() async {
+        await model.reconnect()
+        #expect(model.connection == nil)
+        #expect(relay.requests.isEmpty)
+    }
+
     @Test func disconnectDeletesTheChannelAndForgetsThePairing() async {
         relay.streams["meta"] = .init(text: FakeRelay.put("/", #"{"status":"paired"}"#))
         model.activate()

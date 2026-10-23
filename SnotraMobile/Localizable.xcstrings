@@ -71,12 +71,32 @@
         }
       }
     },
+    "Connect this iPhone to Wi-Fi or mobile data. The app reconnects by itself." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verbinde dieses iPhone mit WLAN oder mobilen Daten. Die App verbindet sich dann von selbst."
+          }
+        }
+      }
+    },
+    "Connected to your desktop" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mit deinem Desktop verbunden"
+          }
+        }
+      }
+    },
     "Connecting to your desktop…" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Verbinde mit deinem Desktop …"
+            "value" : "Verbinde mit deinem Desktop …"
           }
         }
       }
@@ -151,6 +171,16 @@
         }
       }
     },
+    "No internet connection" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Internetverbindung"
+          }
+        }
+      }
+    },
     "Not allowed on the desktop" : {
       "localizations" : {
         "de" : {
@@ -221,16 +251,6 @@
         }
       }
     },
-    "Paired with your desktop" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mit deinem Desktop gekoppelt"
-          }
-        }
-      }
-    },
     "Pairing failed" : {
       "localizations" : {
         "de" : {
@@ -291,6 +311,16 @@
         }
       }
     },
+    "Snotra on your desktop isn't running or has no connection. It shows up here again as soon as it's back." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snotra läuft auf deinem Desktop nicht oder hat keine Verbindung. Sobald es wieder da ist, erscheint es hier."
+          }
+        }
+      }
+    },
     "Snotra on your desktop no longer knows this iPhone. Pair it again to follow and drive its chats." : {
       "localizations" : {
         "de" : {
@@ -347,6 +377,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Der Schlüssel stimmt nicht"
+          }
+        }
+      }
+    },
+    "The app keeps trying. Snotra's relay may be down for a moment." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die App versucht es weiter. Snotras Relay ist vielleicht kurz nicht erreichbar."
           }
         }
       }
@@ -441,6 +481,16 @@
         }
       }
     },
+    "Try now" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jetzt versuchen"
+          }
+        }
+      }
+    },
     "Type the key" : {
       "localizations" : {
         "de" : {
@@ -466,7 +516,27 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Warte auf deinen Desktop …"
+            "value" : "Warte auf deinen Desktop …"
+          }
+        }
+      }
+    },
+    "Your chats appear here once the connection stands." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deine Chats erscheinen hier, sobald die Verbindung steht."
+          }
+        }
+      }
+    },
+    "Your desktop is offline" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dein Desktop ist offline"
           }
         }
       }

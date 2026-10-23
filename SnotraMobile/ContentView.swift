@@ -5,6 +5,7 @@ struct ContentView: View {
     @State private var isPairingPresented = false
     @State private var isDisconnectConfirming = false
     @State private var model = RemoteModel()
+    @State private var network = NetworkMonitor()
 
     var body: some View {
         Group {
@@ -22,6 +23,10 @@ struct ContentView: View {
             PairingView()
         }
         .task { model.reload() }
+        .onChange(of: network.isAvailable) { _, available in
+            // Back online: connect now rather than after the channel's back-off.
+            if available, scenePhase == .active { Task { await model.reconnect() } }
+        }
         .onChange(of: scenePhase, initial: true) { _, phase in
             if phase == .active {
                 model.activate()
@@ -32,16 +37,10 @@ struct ContentView: View {
     }
 
     private var paired: some View {
-        ContentUnavailableView {
-            Label("Paired with your desktop", systemImage: "iphone.and.arrow.forward")
-        } description: {
-            Text("Following and driving chats arrives in a later version.")
-        } actions: {
-            Button("Disconnect", role: .destructive) {
-                isDisconnectConfirming = true
-            }
-            .accessibilityIdentifier("disconnect")
-        }
+        PairedView(
+            display: ConnectionDisplay(model.connection, networkAvailable: network.isAvailable),
+            onTryNow: { Task { await model.reconnect() } },
+            onDisconnect: { isDisconnectConfirming = true })
         .confirmationDialog("Disconnect this iPhone?", isPresented: $isDisconnectConfirming, titleVisibility: .visible) {
             Button("Disconnect", role: .destructive) {
                 Task { await model.unpair() }
