@@ -4,6 +4,7 @@ import SwiftUI
 /// one it has open. A workspace leads to its chats.
 struct WorkspacesView: View {
     let mirror: DesktopMirror
+    var onAbout: () -> Void = {}
     var onDisconnect: () -> Void = {}
 
     var body: some View {
@@ -18,17 +19,7 @@ struct WorkspacesView: View {
                 .navigationDestination(for: ChatRoute.self) { route in
                     ChatView(mirror: mirror, route: route)
                 }
-                .toolbar {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Menu {
-                            Button("Disconnect", systemImage: "iphone.slash", role: .destructive, action: onDisconnect)
-                                .accessibilityIdentifier("disconnect")
-                        } label: {
-                            Label("More", systemImage: "ellipsis")
-                        }
-                        .accessibilityIdentifier("more")
-                    }
-                }
+                .toolbar { MoreMenu(onAbout: onAbout, onDisconnect: onDisconnect) }
                 .refreshable { await mirror.refreshWorkspaces() }
         }
     }

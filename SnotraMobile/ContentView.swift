@@ -4,6 +4,7 @@ struct ContentView: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var isPairingPresented = false
     @State private var isDisconnectConfirming = false
+    @State private var isAboutPresented = false
     @State private var model = RemoteModel()
     @State private var network = NetworkMonitor()
 
@@ -21,6 +22,9 @@ struct ContentView: View {
             if scenePhase == .active { model.activate() }
         }) {
             PairingView()
+        }
+        .sheet(isPresented: $isAboutPresented) {
+            AboutView()
         }
         .task { model.reload() }
         .onChange(of: network.isAvailable) { _, available in
@@ -40,12 +44,17 @@ struct ContentView: View {
         Group {
             let display = ConnectionDisplay(model.connection, session: model.session, networkAvailable: network.isAvailable)
             if display == .connected, let mirror = model.mirror {
-                WorkspacesView(mirror: mirror, onDisconnect: { isDisconnectConfirming = true })
+                WorkspacesView(mirror: mirror, onAbout: showAbout, onDisconnect: confirmDisconnect)
             } else {
-                PairedView(
-                    display: display,
-                    onTryNow: { Task { await model.reconnect() } },
-                    onDisconnect: { isDisconnectConfirming = true })
+                NavigationStack {
+                    PairedView(
+                        display: display,
+                        onTryNow: { Task { await model.reconnect() } },
+                        onDisconnect: confirmDisconnect)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background(Color.background)
+                        .toolbar { MoreMenu(onAbout: showAbout, onDisconnect: confirmDisconnect) }
+                }
             }
         }
         .confirmationDialog("Disconnect this iPhone?", isPresented: $isDisconnectConfirming, titleVisibility: .visible) {
@@ -57,7 +66,19 @@ struct ContentView: View {
         }
     }
 
+    private func showAbout() { isAboutPresented = true }
+    private func confirmDisconnect() { isDisconnectConfirming = true }
+
     private var notPaired: some View {
+        NavigationStack {
+            notPairedContent
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(Color.background)
+                .toolbar { MoreMenu(onAbout: showAbout) }
+        }
+    }
+
+    private var notPairedContent: some View {
         ContentUnavailableView {
             if model.notice == .removedAtDesktop {
                 Label("Removed on your desktop", systemImage: "iphone.slash")
