@@ -125,8 +125,9 @@ final class EventLog: @unchecked Sendable {
     }
 
     /// Generous, because it only bounds a wait that ends as soon as the event is
-    /// there: a CI simulator can stall for seconds.
-    static let patience: Double = 15
+    /// there: a CI simulator can stall for seconds, and right after it boots
+    /// for more than 15 (#48). A passing test never waits this long.
+    static let patience: Double = 60
 
     /// Whether an event that matches shows up within the time.
     func waitFor(within seconds: Double = patience, _ matches: (RelayChannel.Event) -> Bool) async -> Bool {
