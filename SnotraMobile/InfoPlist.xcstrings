@@ -18,6 +18,24 @@
           }
         }
       }
+    },
+    "NSFaceIDUsageDescription" : {
+      "comment" : "Asked before Face ID first confirms an approval.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snotra uses Face ID to make sure it is you who allows a tool on your desktop."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snotra nutzt Face ID, damit nur du ein Werkzeug auf deinem Desktop erlauben kannst."
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

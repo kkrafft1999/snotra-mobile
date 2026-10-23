@@ -7,6 +7,7 @@ struct ChatView: View {
     @State private var model: ChatModel
     @State private var draft = ""
     @State private var refusal: ChatModel.SendRefusal?
+    @State private var approvalRefusal: ChatModel.ApprovalRefusal?
     @FocusState private var composerFocused: Bool
 
     init(mirror: DesktopMirror, route: ChatRoute) {
@@ -36,6 +37,12 @@ struct ChatView: View {
                 Button("OK", role: .cancel) {}
             } message: {
                 Text(refusalMessage)
+            }
+            .alert(approvalRefusalTitle,
+                   isPresented: Binding(get: { approvalRefusal != nil }, set: { if !$0 { approvalRefusal = nil } })) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(approvalRefusalMessage)
             }
     }
 
@@ -96,7 +103,18 @@ struct ChatView: View {
                         MessageView(message: message)
                     }
                     if transcript.isRunning {
-                        LiveTurnView(turn: transcript.live, state: transcript.state)
+                        LiveTurnView(turn: transcript.live, state: transcript.state,
+                                     cardShown: !transcript.openApprovals.isEmpty)
+                    }
+                    ForEach(transcript.approvals) { card in
+                        ApprovalCardView(card: card, answering: model.answering.contains(card.id)) { answer in
+                            Task {
+                                switch await model.respond(to: card.id, answer) {
+                                case nil, .notConfirmed?: break
+                                case let refused?: approvalRefusal = refused
+                                }
+                            }
+                        }
                     }
                     Color.clear.frame(height: 1).id(ChatView.bottom)
                 }
@@ -109,6 +127,9 @@ struct ChatView: View {
                 proxy.scrollTo(ChatView.bottom, anchor: .bottom)
             }
             .onChange(of: transcript.messages.count) {
+                withAnimation { proxy.scrollTo(ChatView.bottom, anchor: .bottom) }
+            }
+            .onChange(of: transcript.openApprovals.count) {
                 withAnimation { proxy.scrollTo(ChatView.bottom, anchor: .bottom) }
             }
         }
@@ -194,6 +215,24 @@ struct ChatView: View {
         }
     }
 
+    private var approvalRefusalTitle: LocalizedStringResource {
+        switch approvalRefusal {
+        case .noPasscode: "Set up a passcode first"
+        case .gone: "This approval is no longer open"
+        case .refused: "Your desktop didn't take this answer"
+        case .notConfirmed, .notDelivered, nil: "The answer didn't go out"
+        }
+    }
+
+    private var approvalRefusalMessage: LocalizedStringResource {
+        switch approvalRefusal {
+        case .noPasscode: "Allowing from your phone needs Face ID or your passcode. Set a passcode in the iPhone's settings, or answer on your desktop."
+        case .gone: "It was answered on your desktop or ran out of time."
+        case .refused: "Answer it on your desktop."
+        case .notConfirmed, .notDelivered, nil: "Snotra on your desktop didn't confirm it in time. Try again."
+        }
+    }
+
     private var refusalMessage: LocalizedStringResource {
         switch refusal {
         case .otherWorkspace: "Your desktop has another workspace open. Open this one there first; its tools work in it."
@@ -262,6 +301,8 @@ struct MessageView: View {
 struct LiveTurnView: View {
     let turn: ChatTranscript.LiveTurn?
     let state: DesktopMirror.ChatState
+    /// The card the turn waits for is shown below, with its own words.
+    var cardShown = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -269,7 +310,9 @@ struct LiveTurnView: View {
             if let text = turn?.text, !text.isEmpty {
                 AnswerText(text: text)
             }
-            if state == .needsApproval {
+            if state == .needsApproval && cardShown {
+                EmptyView()
+            } else if state == .needsApproval {
                 Label("Waiting for your approval on your desktop", systemImage: "exclamationmark.bubble")
                     .font(.footnote)
                     .foregroundStyle(.orange)
