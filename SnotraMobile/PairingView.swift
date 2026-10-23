@@ -180,6 +180,8 @@ extension PairingFlow.Failure {
         case .notAllowed: "Not allowed on the desktop"
         case .notVerified: "Pairing failed"
         case .keys: "This iPhone couldn't keep its keys"
+        case .deviceUnsupported: "This iPhone can't pair"
+        case .appNotAccepted: "The relay didn't accept this app"
         }
     }
 
@@ -194,6 +196,8 @@ extension PairingFlow.Failure {
         case .notAllowed: "The pairing was denied or cancelled on your desktop."
         case .notVerified: "Your desktop's keys could not be verified, so nothing was kept. Start again on your desktop."
         case .keys: "Try again. If it keeps failing, restart the iPhone."
+        case .deviceUnsupported: "Pairing needs App Attest, which this iPhone or this copy of the app doesn't offer. Update iOS, or install the app from TestFlight or the App Store."
+        case .appNotAccepted: "Apple couldn't confirm that this copy of the app is genuine. Try again later, or install the app again from TestFlight or the App Store."
         }
     }
 }

@@ -19,8 +19,17 @@ struct RelayClient: Sendable {
     /// The Identity Toolkit names no lifetime above an hour.
     static let maxTokenLifetime: TimeInterval = 3600
 
+    /// Which App Check token a call carries: only `lookup` and `claim` are checked (§5.4, §5.5).
+    enum AppCheckUse: Sendable {
+        case none
+        case reusable
+        case limitedUse
+    }
+
     let endpoint: RelayEndpoint
     let transport: any RelayTransport
+    /// Shared across clients so that a reusable token lives on; the endpoint's own when nil.
+    var appCheck: (any AppCheckProvider)?
     var now: @Sendable () -> Date = { Date() }
 
     /// §5.2: a challenge, as the bytes every proof signs.
@@ -56,7 +65,7 @@ struct RelayClient: Sendable {
         let (answer, _) = try await call(url, body: .object([
             "token": .string(customToken),
             "returnSecureToken": .bool(true),
-        ]), appCheck: false)
+        ]))
         guard let idToken = answer["idToken"]?.stringValue, !idToken.isEmpty, idToken.count <= Self.maxTokenChars
         else { throw RelayError.invalidResponse }
         // The lifetime comes in seconds, as a string; an hour when it does not.
@@ -70,14 +79,19 @@ struct RelayClient: Sendable {
     /// One JSON call with a small answer. Returns the answer — `.null` for an
     /// empty one, as `204` brings — and the server's `Date`.
     func call(_ url: URL, method: String = "POST", body: JSONValue? = .object([:]),
-              bearer: String? = nil, appCheck: Bool = true) async throws -> (JSONValue, Date?) {
+              bearer: String? = nil, appCheck: AppCheckUse = .none,
+              headers: [String: String] = [:]) async throws -> (JSONValue, Date?) {
         var request = URLRequest(url: url)
         request.httpMethod = method
         if let body {
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
             request.httpBody = try body.data()
         }
-        if appCheck { request.setValue(endpoint.appCheckToken, forHTTPHeaderField: "X-Firebase-AppCheck") }
+        if appCheck != .none {
+            let provider = self.appCheck ?? endpoint.appCheck.provider(for: endpoint, transport: transport)
+            request.setValue(try await provider.token(limitedUse: appCheck == .limitedUse), forHTTPHeaderField: "X-Firebase-AppCheck")
+        }
+        for (name, value) in headers { request.setValue(value, forHTTPHeaderField: name) }
         if let bearer { request.setValue("Bearer \(bearer)", forHTTPHeaderField: "Authorization") }
         let (data, response) = try await transport.send(request)
         guard data.count <= Self.maxResponseBytes else { throw RelayError.invalidResponse }

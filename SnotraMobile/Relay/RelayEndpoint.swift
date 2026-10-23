@@ -13,10 +13,10 @@ struct RelayEndpoint: Sendable, Equatable {
     let identityToolkitURL: URL
     /// The project's web API key — public, it names the project to the Identity Toolkit.
     let apiKey: String
-    /// Sent as `X-Firebase-AppCheck` on the phone's calls. App Attest takes its
-    /// place against production (#40); until then only the emulator's value exists.
-    let appCheckToken: String
+    /// Where the `X-Firebase-AppCheck` token of `lookup` and `claim` comes from.
+    let appCheck: AppCheckSource
 
+    #if DEBUG
     /// The Firebase emulator of snotra-promotion (`docs/relay.md`, *Local
     /// preview*) on this Mac. The simulator reaches it at 127.0.0.1, which App
     /// Transport Security leaves alone as an IP address.
@@ -26,7 +26,8 @@ struct RelayEndpoint: Sendable, Equatable {
         databaseURL: URL(string: "http://127.0.0.1:9000/?ns=snotra-ai-relay")!,
         identityToolkitURL: URL(string: "http://127.0.0.1:9099/identitytoolkit.googleapis.com/v1")!,
         apiKey: "emulator-api-key",
-        appCheckToken: "emulator-app-check")
+        appCheck: .debugToken("emulator-app-check"))
+    #endif
 
     /// The relays this build ships with (§4): a QR code that names any other host
     /// is refused, and a typed key goes to the first. The emulator only in debug

@@ -9,9 +9,10 @@ extension RelayClient {
         let expiresAt: Date
     }
 
-    /// §5.4. `.notFound` for an unknown, expired or claimed pairing.
+    /// §5.4, with a reusable App Check token. `.notFound` for an unknown, expired or claimed pairing.
     func lookUp(pairingId: String) async throws -> Pairing {
-        let (answer, _) = try await call(endpoint.relayURL.appending(path: "pairings/\(pairingId)"), method: "GET", body: nil)
+        let (answer, _) = try await call(endpoint.relayURL.appending(path: "pairings/\(pairingId)"), method: "GET", body: nil,
+                                   appCheck: .reusable)
         guard let channelId = answer["channelId"]?.stringValue.flatMap({ Data(base64URL: $0) }), channelId.count == 16,
               let keys = answer["desktopKeys"], let desktopKeys = try? KeyBundle(json: keys),
               let expiresAt = answer["expiresAt"]?.numberValue
@@ -21,7 +22,8 @@ extension RelayClient {
     }
 
     /// §5.5: the phone's keys and `MAC_P` into the channel; the answer's token
-    /// lets the phone follow `meta` until the desktop confirms.
+    /// lets the phone follow `meta` until the desktop confirms. The relay
+    /// consumes the App Check token, so it is a limited-use one.
     func claim(pairingId: String, channelId: Data, phoneKeys: KeyBundle, macP: Data,
                sign: @Sendable (Data) throws -> Data) async throws -> Session {
         let challenge = try await challenge()
@@ -31,7 +33,7 @@ extension RelayClient {
             "phoneKeys": try phoneKeys.json,
             "macP": .string(macP.base64URLEncodedString),
             "proof": .string(proof.base64URLEncodedString),
-        ]))
+        ]), appCheck: .limitedUse)
         guard answer["channelId"]?.stringValue == channelId.base64URLEncodedString,
               let token = answer["token"]?.stringValue
         else { throw RelayError.invalidResponse }

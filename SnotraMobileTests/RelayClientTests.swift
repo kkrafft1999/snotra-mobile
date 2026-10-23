@@ -22,13 +22,34 @@ struct RelayClientTests {
             by: relay.phoneKey.publicKey))
     }
 
-    @Test func thePhonesCallsCarryAppCheckButNotTheIdentityToolkits() async throws {
+    @Test func onlyLookUpAndClaimCarryAppCheck() async throws {
         _ = try await relay.client.phoneSession(channelId: relay.channelId, sign: relay.sign)
         let calls = relay.requests
-        #expect(calls[0].value(forHTTPHeaderField: "X-Firebase-AppCheck") == "app-check")
-        #expect(calls[1].value(forHTTPHeaderField: "X-Firebase-AppCheck") == "app-check")
-        #expect(calls[2].value(forHTTPHeaderField: "X-Firebase-AppCheck") == nil)
+        #expect(calls.allSatisfy { $0.value(forHTTPHeaderField: "X-Firebase-AppCheck") == nil })
         #expect(calls[2].url!.query == "key=key")
+    }
+
+    @Test func theClaimTakesALimitedUseTokenAndTheLookUpAReusableOne() async throws {
+        let appCheck = RecordingAppCheck()
+        let client = RelayClient(endpoint: relay.endpoint, transport: relay, appCheck: appCheck)
+        relay.answers["0111"] = .init(json: .object([
+            "channelId": .string(relay.channelId.base64URLEncodedString),
+            "desktopKeys": try KeyBundle(sign: P256.Signing.PrivateKey().publicKey,
+                                         agree: P256.KeyAgreement.PrivateKey().publicKey).json,
+            "expiresAt": .number(1),
+        ]))
+        relay.answers["claim"] = .init(json: .object([
+            "channelId": .string(relay.channelId.base64URLEncodedString), "token": .string("custom"),
+        ]))
+        let phoneKeys = KeyBundle(sign: relay.phoneKey.publicKey, agree: P256.KeyAgreement.PrivateKey().publicKey)
+        _ = try await client.lookUp(pairingId: "0111")
+        _ = try await client.claim(pairingId: "0111", channelId: relay.channelId, phoneKeys: phoneKeys,
+                                   macP: Data(repeating: 0, count: 32), sign: relay.sign)
+
+        #expect(appCheck.requested == [false, true])
+        let carried = relay.requests.map { ($0.url!.lastPathComponent, $0.value(forHTTPHeaderField: "X-Firebase-AppCheck")) }
+        #expect(carried.filter { $0.1 != nil }.map(\.0) == ["0111", "claim"])
+        #expect(carried.compactMap(\.1) == ["reusable-1", "limited-2"])
     }
 
     @Test func theTokensLifetimeIsCappedAtAnHour() async throws {

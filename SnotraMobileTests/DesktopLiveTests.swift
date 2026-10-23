@@ -164,7 +164,7 @@ struct DesktopHarness: Decodable {
 
     var endpoint: RelayEndpoint {
         RelayEndpoint(host: relayHost, relayURL: relayUrl, databaseURL: databaseUrl,
-                      identityToolkitURL: identityToolkitUrl, apiKey: apiKey, appCheckToken: appCheckToken)
+                      identityToolkitURL: identityToolkitUrl, apiKey: apiKey, appCheck: .debugToken(appCheckToken))
     }
 
     static var fixture: DesktopHarness? {
