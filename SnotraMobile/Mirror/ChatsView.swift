@@ -6,7 +6,6 @@ struct ChatsView: View {
     let mirror: DesktopMirror
     let workspaceId: DesktopMirror.Workspace.ID
     @State private var refusal: DesktopMirror.SwitchRefusal?
-    @State private var newChat: ChatRoute?
     @State private var newChatFailed = false
 
     var body: some View {
@@ -30,7 +29,7 @@ struct ChatsView: View {
                 Button("New chat", systemImage: "square.and.pencil") {
                     Task {
                         do throws(RemoteCallError) {
-                            newChat = try await mirror.newChat(in: workspaceId)
+                            mirror.path.append(try await mirror.newChat(in: workspaceId))
                         } catch {
                             newChatFailed = true
                         }
@@ -40,9 +39,6 @@ struct ChatsView: View {
                 .disabled(mirror.activeWorkspaceId != workspaceId)
                 .accessibilityIdentifier("chat.new")
             }
-        }
-        .navigationDestination(item: $newChat) { route in
-            ChatView(mirror: mirror, route: route)
         }
         .alert("Couldn't start a new chat", isPresented: $newChatFailed) {
             Button("OK", role: .cancel) {}

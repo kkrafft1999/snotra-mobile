@@ -3,12 +3,12 @@ import SwiftUI
 /// The workspaces the desktop opened to this iPhone (concept §1), and which
 /// one it has open. A workspace leads to its chats.
 struct WorkspacesView: View {
-    let mirror: DesktopMirror
+    @Bindable var mirror: DesktopMirror
     var onAbout: () -> Void = {}
     var onDisconnect: () -> Void = {}
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $mirror.path) {
             content
                 .scrollContentBackground(.hidden)
                 .background(Color.background)
