@@ -81,6 +81,11 @@ final class DesktopMirror {
         self.call = call
     }
 
+    /// The workspaces came in at least once.
+    var hasLoaded: Bool {
+        if case .loaded = workspaces { true } else { false }
+    }
+
     var activeWorkspaceId: Workspace.ID? {
         if case .loaded(let list) = workspaces { list.first(where: \.active)?.id } else { nil }
     }

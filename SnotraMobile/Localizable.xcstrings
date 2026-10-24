@@ -781,6 +781,16 @@
         }
       }
     },
+    "Reconnecting…" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verbinde neu …"
+          }
+        }
+      }
+    },
     "Removed on your desktop" : {
       "localizations" : {
         "de" : {

@@ -14,6 +14,12 @@ struct PairedView: View {
         } description: {
             Text(message)
         } actions: {
+            if display == .connecting {
+                ProgressView()
+                    .controlSize(.large)
+                    .padding(.bottom, 8)
+                    .accessibilityIdentifier("connecting")
+            }
             if [.relayUnreachable, .cannotConnect, .updateDesktop].contains(display) {
                 Button("Try now", action: onTryNow)
                     .buttonStyle(.borderedProminent)
@@ -64,6 +70,30 @@ struct PairedView: View {
         case .updateDesktop: "arrow.down.circle"
         }
     }
+}
+
+/// Above the desktop's workspaces while a connection that stood before comes
+/// back: it takes a second or two, and without a sign the app seems to hang.
+struct ReconnectingBar: View {
+    var body: some View {
+        HStack(spacing: 8) {
+            ProgressView()
+                .controlSize(.small)
+            Text("Reconnecting…")
+        }
+        .font(.footnote.weight(.medium))
+        .padding(.horizontal, 14)
+        .padding(.vertical, 8)
+        .background(.regularMaterial, in: .capsule)
+        .padding(.vertical, 4)
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("reconnecting")
+    }
+}
+
+#Preview("Reconnecting") {
+    WorkspacesView(mirror: .preview)
+        .safeAreaInset(edge: .top, spacing: 0) { ReconnectingBar() }
 }
 
 #Preview("Every state") {
