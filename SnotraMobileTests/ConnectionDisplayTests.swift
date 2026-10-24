@@ -27,6 +27,17 @@ struct ConnectionDisplayTests {
         #expect(ConnectionDisplay(.unreachable, session: .ready(welcome), networkAvailable: true) == .relayUnreachable)
     }
 
+    @Test func theWorkspacesStayWhileAConnectionThatStoodComesBack() {
+        #expect(ConnectionDisplay.connected.showsMirror(hasLoaded: false))
+        #expect(ConnectionDisplay.connecting.showsMirror(hasLoaded: true))
+        // The very first connection has nothing to keep on screen.
+        #expect(!ConnectionDisplay.connecting.showsMirror(hasLoaded: false))
+        // Everything that needs the person's attention gets its own screen.
+        for display in ConnectionDisplay.allCases where ![.connected, .connecting].contains(display) {
+            #expect(!display.showsMirror(hasLoaded: true))
+        }
+    }
+
     @Test func noNetworkWinsOverWhatTheChannelLastSaid() {
         for state in [nil, .connecting, .connected(desktopOnline: true), .connected(desktopOnline: false), .unreachable] as [RelayConnectionState?] {
             #expect(ConnectionDisplay(state, networkAvailable: false) == .noNetwork)

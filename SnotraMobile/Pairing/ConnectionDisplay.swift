@@ -37,6 +37,13 @@ enum ConnectionDisplay: Equatable, CaseIterable {
         case nil, .connecting, .ended: self = .connecting
         }
     }
+
+    /// Whether the desktop's workspaces take the screen: while the session
+    /// stands, and while one that stood before comes back, so that the person
+    /// keeps their place instead of landing on the connecting screen.
+    func showsMirror(hasLoaded: Bool) -> Bool {
+        self == .connected || (self == .connecting && hasLoaded)
+    }
 }
 
 /// Whether the phone has a path to the internet at all (Network framework).

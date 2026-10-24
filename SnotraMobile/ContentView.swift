@@ -43,8 +43,15 @@ struct ContentView: View {
     private var paired: some View {
         Group {
             let display = ConnectionDisplay(model.connection, session: model.session, networkAvailable: network.isAvailable)
-            if display == .connected, let mirror = model.mirror {
+            if let mirror = model.mirror, display.showsMirror(hasLoaded: mirror.hasLoaded) {
                 WorkspacesView(mirror: mirror, onAbout: showAbout, onDisconnect: confirmDisconnect)
+                    .safeAreaInset(edge: .top, spacing: 0) {
+                        if display == .connecting {
+                            ReconnectingBar()
+                                .transition(.move(edge: .top).combined(with: .opacity))
+                        }
+                    }
+                    .animation(.default, value: display)
             } else {
                 NavigationStack {
                     PairedView(
