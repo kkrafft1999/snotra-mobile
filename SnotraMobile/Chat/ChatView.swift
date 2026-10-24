@@ -418,42 +418,44 @@ struct AnswerText: View {
     }
 }
 
-/// A Markdown table in a grid that scrolls sideways when it is wider than the screen.
+/// A Markdown table that fits the screen by wrapping its widest columns (`TableLayout`)
+/// and scrolls sideways only when that is not enough.
 private struct MarkdownTableView: View {
     let table: MarkdownBlock.Table
+    @State private var width: CGFloat?
 
     var body: some View {
         ScrollView(.horizontal) {
-            Grid(horizontalSpacing: 0, verticalSpacing: 0) {
-                GridRow {
-                    ForEach(Array(table.header.enumerated()), id: \.offset) { column, cell in
-                        self.cell(cell, column: column)
-                            .font(.footnote.weight(.semibold))
-                            .gridColumnAlignment(alignment(column))
-                    }
+            TableLayout(columns: table.header.count, availableWidth: width) {
+                ForEach(Array(table.header.enumerated()), id: \.offset) { column, cell in
+                    self.cell(cell, column: column, separated: !table.rows.isEmpty)
+                        .font(.footnote.weight(.semibold))
                 }
-                ForEach(Array(table.rows.enumerated()), id: \.offset) { _, row in
-                    Divider()
-                    GridRow {
-                        ForEach(Array(row.enumerated()), id: \.offset) { column, cell in
-                            self.cell(cell, column: column)
-                                .font(.footnote)
-                        }
+                ForEach(Array(table.rows.enumerated()), id: \.offset) { index, row in
+                    ForEach(Array(row.enumerated()), id: \.offset) { column, cell in
+                        self.cell(cell, column: column, separated: index < table.rows.count - 1)
+                            .font(.footnote)
                     }
                 }
             }
             .textSelection(.enabled)
         }
+        .scrollBounceBehavior(.basedOnSize, axes: .horizontal)
+        .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width = $0 }
         .background(Color(.secondarySystemBackground), in: .rect(cornerRadius: 10))
     }
 
-    private func cell(_ text: String, column: Int) -> some View {
+    /// A cell filling its slot in the row, with the line under the row when another one follows.
+    private func cell(_ text: String, column: Int, separated: Bool) -> some View {
         Text(AttributedString(inlineMarkdown: text))
             .multilineTextAlignment(textAlignment(column))
-            .fixedSize(horizontal: false, vertical: true)
-            .frame(maxWidth: 240, alignment: Alignment(horizontal: alignment(column), vertical: .top))
             .padding(.horizontal, 10)
             .padding(.vertical, 7)
+            .frame(maxWidth: .infinity, maxHeight: .infinity,
+                   alignment: Alignment(horizontal: alignment(column), vertical: .top))
+            .overlay(alignment: .bottom) {
+                if separated { Divider() }
+            }
     }
 
     private func alignment(_ column: Int) -> HorizontalAlignment {
