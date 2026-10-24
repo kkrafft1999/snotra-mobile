@@ -271,6 +271,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Snotra;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Snotra uses the camera to scan the pairing code on your desktop.";
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "Snotra uses Face ID to make sure it is you who allows a tool on your desktop.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -300,6 +301,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Snotra;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Snotra uses the camera to scan the pairing code on your desktop.";
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "Snotra uses Face ID to make sure it is you who allows a tool on your desktop.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
