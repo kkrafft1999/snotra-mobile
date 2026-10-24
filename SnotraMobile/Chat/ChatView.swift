@@ -381,8 +381,90 @@ struct AnswerText: View {
                             .padding(12)
                     }
                     .background(Color(.secondarySystemBackground), in: .rect(cornerRadius: 10))
+                case .table(let table):
+                    MarkdownTableView(table: table)
+                case .list(let items):
+                    VStack(alignment: .leading, spacing: 4) {
+                        ForEach(Array(items.enumerated()), id: \.offset) { _, item in
+                            HStack(alignment: .firstTextBaseline, spacing: 6) {
+                                Text(item.marker)
+                                    .monospacedDigit()
+                                    .foregroundStyle(.secondary)
+                                Text(AttributedString(inlineMarkdown: item.text))
+                                    .textSelection(.enabled)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                            }
+                            .padding(.leading, CGFloat(item.level) * 18)
+                        }
+                    }
+                case .quote(let quote):
+                    Text(AttributedString(inlineMarkdown: quote))
+                        .textSelection(.enabled)
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.leading, 12)
+                        .overlay(alignment: .leading) {
+                            Capsule().fill(.tertiary).frame(width: 3)
+                        }
+                case .rule:
+                    Divider()
                 }
             }
+        }
+    }
+}
+
+/// A Markdown table in a grid that scrolls sideways when it is wider than the screen.
+private struct MarkdownTableView: View {
+    let table: MarkdownBlock.Table
+
+    var body: some View {
+        ScrollView(.horizontal) {
+            Grid(horizontalSpacing: 0, verticalSpacing: 0) {
+                GridRow {
+                    ForEach(Array(table.header.enumerated()), id: \.offset) { column, cell in
+                        self.cell(cell, column: column)
+                            .font(.footnote.weight(.semibold))
+                            .gridColumnAlignment(alignment(column))
+                    }
+                }
+                ForEach(Array(table.rows.enumerated()), id: \.offset) { _, row in
+                    Divider()
+                    GridRow {
+                        ForEach(Array(row.enumerated()), id: \.offset) { column, cell in
+                            self.cell(cell, column: column)
+                                .font(.footnote)
+                        }
+                    }
+                }
+            }
+            .textSelection(.enabled)
+        }
+        .background(Color(.secondarySystemBackground), in: .rect(cornerRadius: 10))
+    }
+
+    private func cell(_ text: String, column: Int) -> some View {
+        Text(AttributedString(inlineMarkdown: text))
+            .multilineTextAlignment(textAlignment(column))
+            .fixedSize(horizontal: false, vertical: true)
+            .frame(maxWidth: 240, alignment: Alignment(horizontal: alignment(column), vertical: .top))
+            .padding(.horizontal, 10)
+            .padding(.vertical, 7)
+    }
+
+    private func alignment(_ column: Int) -> HorizontalAlignment {
+        switch table.alignments[column] {
+        case .leading: .leading
+        case .center: .center
+        case .trailing: .trailing
+        }
+    }
+
+    private func textAlignment(_ column: Int) -> TextAlignment {
+        switch table.alignments[column] {
+        case .leading: .leading
+        case .center: .center
+        case .trailing: .trailing
         }
     }
 }
