@@ -42,6 +42,8 @@ final class ChatModel {
     let workspaceId: DesktopMirror.Workspace.ID
     private(set) var transcript: ChatTranscript
     private(set) var loading: Loading
+    /// What the composer holds.
+    var draft = ""
     private(set) var sending = false
     private(set) var stopping = false
     private(set) var loadingOlder = false
@@ -94,6 +96,18 @@ final class ChatModel {
         let params = JSONValue.object(["chatId": .string(chatId), "before": .string(before), "limit": 50])
         guard let page = try? await call("chat.more", params).decoded(as: Page.self) else { return }
         transcript.prepend(page.messages, before: page.before)
+    }
+
+    /// Sends the composer's text. The composer empties before the call goes
+    /// out, not once the desktop answered; a message that did not go out comes
+    /// back to it, unless something new was typed meanwhile.
+    func sendDraft() async -> SendRefusal? {
+        let text = draft
+        guard !sending, !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return nil }
+        draft = ""
+        let refusal = await send(text)
+        if refusal != nil, draft.isEmpty { draft = text }
+        return refusal
     }
 
     /// `message.send`; nil once the desktop accepted the turn.

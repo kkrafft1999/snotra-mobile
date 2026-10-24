@@ -5,7 +5,8 @@ import SwiftUI
 struct ChatView: View {
     let mirror: DesktopMirror
     @State private var model: ChatModel
-    @State private var draft = ""
+    /// A new one gives the composer a fresh text field (see the send button).
+    @State private var composerGeneration = 0
     @State private var refusal: ChatModel.SendRefusal?
     @State private var approvalRefusal: ChatModel.ApprovalRefusal?
     @FocusState private var composerFocused: Bool
@@ -156,8 +157,9 @@ struct ChatView: View {
                     }
                 }
                 HStack(alignment: .bottom, spacing: 8) {
-                    TextField("Message", text: $draft, axis: .vertical)
+                    TextField("Message", text: $model.draft, axis: .vertical)
                         .lineLimit(1...6)
+                        .id(composerGeneration)
                         .focused($composerFocused)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 8)
@@ -176,14 +178,16 @@ struct ChatView: View {
                         .accessibilityIdentifier("chat.stop")
                     } else {
                         Button {
-                            let text = draft
                             Task {
-                                if let refused = await model.send(text) {
+                                if let refused = await model.sendDraft() {
                                     refusal = refused
-                                } else {
-                                    draft = ""
                                 }
                             }
+                            // The text field sits on a UITextView, which writes what the keyboard
+                            // still holds (an autocorrection, dictation) back into the draft on a
+                            // later update. A fresh one holds nothing; the keyboard stays up.
+                            composerGeneration += 1
+                            if composerFocused { composerFocused = true }
                         } label: {
                             if model.sending {
                                 ProgressView()
@@ -193,7 +197,7 @@ struct ChatView: View {
                             }
                         }
                         .disabled(!workspaceActive || model.sending
-                                  || draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                                  || model.draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                         .accessibilityLabel("Send")
                         .accessibilityIdentifier("chat.send")
                     }

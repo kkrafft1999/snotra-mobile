@@ -63,6 +63,49 @@ struct ChatModelTests {
         #expect(chat.transcript.isRunning)
     }
 
+    @Test func theComposerEmptiesAsTheMessageGoesOutAndARefusalBringsItBack() async {
+        /// The draft as the desktop's call sees it.
+        final class Probe { weak var chat: ChatModel?; var drafts: [String] = [] }
+        let probe = Probe()
+        let chat = ChatModel(chatId: "c1", workspaceId: "w1") { [desk] method, params throws(RemoteCallError) in
+            if method == "message.send" { probe.drafts.append(probe.chat?.draft ?? "?") }
+            desk.calls.append((method, params))
+            return try desk.answer(method).get()
+        }
+        probe.chat = chat
+        await chat.open()
+        desk.answers["message.send"] = [.failure(.timedOut), .success(.object(["runId": "r1", "messageId": "m1"]))]
+
+        chat.draft = "Tell me more"
+        #expect(await chat.sendDraft() == .notDelivered)
+        #expect(chat.draft == "Tell me more")
+        #expect(await chat.sendDraft() == nil)
+        #expect(chat.draft == "")
+        #expect(probe.drafts == ["", ""])
+    }
+
+    @Test func aRefusedMessageLeavesWhatWasTypedMeanwhile() async {
+        let chat = ChatModel(chatId: "c1", workspaceId: "w1") { method, _ throws(RemoteCallError) in
+            guard method == "message.send" else { return .object([:]) }
+            try? await Task.sleep(for: .milliseconds(100))
+            throw .timedOut
+        }
+        chat.draft = "First"
+        async let refusal = chat.sendDraft()
+        #expect(await waitFor { chat.sending })
+        chat.draft = "Second"
+        #expect(await refusal == .notDelivered)
+        #expect(chat.draft == "Second")
+    }
+
+    @Test func anEmptyDraftSendsNothing() async {
+        let chat = model()
+        chat.draft = "  \n "
+        #expect(await chat.sendDraft() == nil)
+        #expect(chat.draft == "  \n ")
+        #expect(!desk.calls.contains { $0.method == "message.send" })
+    }
+
     @Test func eachRefusalToSendHasItsNote() async {
         let chat = model()
         await chat.open()
