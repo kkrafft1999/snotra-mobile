@@ -521,6 +521,26 @@
         }
       }
     },
+    "Legal" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rechtliches"
+          }
+        }
+      }
+    },
+    "Legal notice (German)" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impressum"
+          }
+        }
+      }
+    },
     "Licence: CC BY 3.0 US" : {
       "localizations" : {
         "de" : {
@@ -781,6 +801,16 @@
         }
       }
     },
+    "Privacy policy (German)" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Datenschutzerklärung"
+          }
+        }
+      }
+    },
     "Reconnecting…" : {
       "localizations" : {
         "de" : {
@@ -867,6 +897,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Frühere Nachrichten anzeigen"
+          }
+        }
+      }
+    },
+    "Snotra Agent is an open-source AI agent for your desktop, built around your folder. It works with cloud or local models, with no account and no telemetry. This app is its remote: when you are away from your desk, you follow and drive the chats on your desktop, end-to-end encrypted." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snotra Agent ist ein Open-Source-KI-Agent für deinen Desktop, um deinen Ordner gebaut. Er arbeitet mit Cloud- oder lokalen Modellen, ohne Konto und ohne Telemetrie. Diese App ist seine Fernbedienung: Bist du nicht am Schreibtisch, verfolgst und steuerst du damit die Chats auf deinem Desktop, Ende-zu-Ende-verschlüsselt."
           }
         }
       }

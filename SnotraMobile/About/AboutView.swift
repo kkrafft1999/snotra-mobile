@@ -1,7 +1,8 @@
 import SwiftUI
 
-/// The app's name and version, and the credit for the word list the safety
-/// phrase draws on (concept §8). CC BY 3.0 US asks for the credit, a link to
+/// What Snotra is and where to find it, the app's version, the credit for the
+/// word list the safety phrase draws on (concept §8) and the way to the legal
+/// pages. CC BY 3.0 US asks for the credit, a link to
 /// the licence and a note of what was changed — the same as
 /// `safety-words-v1-LICENSE.txt` says next to the data.
 struct AboutView: View {
@@ -11,6 +12,11 @@ struct AboutView: View {
     var body: some View {
         NavigationStack {
             List {
+                Section {
+                    Text(SnotraLinks.intro)
+                    Link(destination: SnotraLinks.website) { Text(verbatim: "snotra-ai.dev") }
+                        .accessibilityIdentifier("about.website")
+                }
                 Section {
                     LabeledContent("Version", value: version)
                         .accessibilityIdentifier("about.version")
@@ -23,6 +29,14 @@ struct AboutView: View {
                         .accessibilityIdentifier("about.licence")
                 } header: {
                     Text("Word list")
+                }
+                Section {
+                    Link("Legal notice (German)", destination: SnotraLinks.legalNotice)
+                        .accessibilityIdentifier("about.legalNotice")
+                    Link("Privacy policy (German)", destination: SnotraLinks.privacyPolicy)
+                        .accessibilityIdentifier("about.privacyPolicy")
+                } header: {
+                    Text("Legal")
                 }
             }
             .scrollContentBackground(.hidden)
@@ -45,6 +59,15 @@ struct AboutView: View {
         let build = info["CFBundleVersion"] as? String ?? "?"
         return "\(version) (\(build))"
     }
+}
+
+/// What Snotra is, and its website with the legal notice and the privacy
+/// policy. The legal pages are German only, on purpose.
+enum SnotraLinks {
+    static let website = URL(string: "https://snotra-ai.dev")!
+    static let legalNotice = URL(string: "https://snotra-ai.dev/impressum")!
+    static let privacyPolicy = URL(string: "https://snotra-ai.dev/datenschutz")!
+    static let intro: LocalizedStringResource = "Snotra Agent is an open-source AI agent for your desktop, built around your folder. It works with cloud or local models, with no account and no telemetry. This app is its remote: when you are away from your desk, you follow and drive the chats on your desktop, end-to-end encrypted."
 }
 
 /// The EFF short word list 2.0 and its licence, as the About screen names them.
