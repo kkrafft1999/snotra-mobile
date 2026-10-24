@@ -151,6 +151,16 @@
         }
       }
     },
+    "Always ask" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Immer fragen"
+          }
+        }
+      }
+    },
     "Answer it on your desktop." : {
       "localizations" : {
         "de" : {
@@ -181,12 +191,32 @@
         }
       }
     },
+    "Auto" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auto"
+          }
+        }
+      }
+    },
     "Camera" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kamera"
+          }
+        }
+      }
+    },
+    "Can't be read" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nicht lesbar"
           }
         }
       }
@@ -211,12 +241,32 @@
         }
       }
     },
+    "Change these on your desktop." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ändern kannst du das auf deinem Desktop."
+          }
+        }
+      }
+    },
     "Chat not available" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Chat nicht verfügbar"
+          }
+        }
+      }
+    },
+    "Chat settings" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chat-Einstellungen"
           }
         }
       }
@@ -571,6 +621,26 @@
         }
       }
     },
+    "Mode" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modus"
+          }
+        }
+      }
+    },
+    "Model" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modell"
+          }
+        }
+      }
+    },
     "More" : {
       "localizations" : {
         "de" : {
@@ -651,6 +721,16 @@
         }
       }
     },
+    "None set up" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keins eingerichtet"
+          }
+        }
+      }
+    },
     "Not allowed on the desktop" : {
       "localizations" : {
         "de" : {
@@ -677,6 +757,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "OK"
+          }
+        }
+      }
+    },
+    "Off" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aus"
+          }
+        }
+      }
+    },
+    "On" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "An"
           }
         }
       }
@@ -811,6 +911,16 @@
         }
       }
     },
+    "Reasoning" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reasoning-Level"
+          }
+        }
+      }
+    },
     "Reconnecting…" : {
       "localizations" : {
         "de" : {
@@ -897,6 +1007,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Frühere Nachrichten anzeigen"
+          }
+        }
+      }
+    },
+    "Shows the chat's settings" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zeigt die Einstellungen des Chats"
+          }
+        }
+      }
+    },
+    "Skills" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skills"
+          }
+        }
+      }
+    },
+    "Smart" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Intelligent"
           }
         }
       }
@@ -1347,6 +1487,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Um hier zu schreiben, öffne diesen Workspace auf deinem Desktop."
+          }
+        }
+      }
+    },
+    "Tools" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tools"
           }
         }
       }
