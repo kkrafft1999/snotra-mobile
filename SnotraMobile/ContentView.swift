@@ -32,10 +32,12 @@ struct ContentView: View {
             if available, scenePhase == .active { Task { await model.reconnect() } }
         }
         .onChange(of: scenePhase, initial: true) { _, phase in
-            if phase == .active {
-                model.activate()
-            } else {
-                Task { await model.deactivate() }
+            switch phase {
+            case .active: model.activate()
+            // Face ID for an approval, Control Center and the like only make the scene
+            // inactive for a moment; the connection stays, or the answer has no session to go out on.
+            case .background: Task { await model.deactivate() }
+            default: break
             }
         }
     }
