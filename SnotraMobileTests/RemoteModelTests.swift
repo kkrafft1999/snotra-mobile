@@ -51,6 +51,18 @@ struct RemoteModelTests {
         #expect(model.pairing != nil)
     }
 
+    @Test func thePlaceOnScreenOutlastsTheBackground() async {
+        relay.streams["meta"] = .init(text: FakeRelay.put("/", #"{"status":"paired"}"#))
+        model.activate()
+        let mirror = model.mirror
+        mirror?.path.append("w1")
+        await model.deactivate()
+        model.activate()
+        #expect(model.mirror === mirror)
+        #expect(model.mirror?.path.count == 1)
+        await model.deactivate()
+    }
+
     @Test func tryNowOpensAFreshConnection() async {
         relay.streams["meta"] = .init(text: FakeRelay.put("/", #"{"status":"paired"}"#))
         model.activate()

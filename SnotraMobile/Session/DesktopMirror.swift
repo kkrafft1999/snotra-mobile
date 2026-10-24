@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import SwiftUI
 
 /// What the phone shows of the desktop (concept §1): the workspaces opened to
 /// it, which one the desktop has open, and the chats of each. A mirror, not a
@@ -71,6 +72,10 @@ final class DesktopMirror {
     private var runningChats: [String: ChatState]?
     /// The chats on screen, which hear their events.
     private var openChats: [String: ChatModel] = [:]
+    /// Where the person stands among the workspaces and chats. Kept here, not
+    /// in the view: the screen gives way to the connection's state now and then,
+    /// coming back from the lock screen too, and the place has to outlast that.
+    var path = NavigationPath()
 
     typealias Call = @MainActor (String, JSONValue) async throws(RemoteCallError) -> JSONValue
     private let call: Call
