@@ -27,8 +27,27 @@ struct AboutTests {
         #expect(Self.credit(in: "de") != Self.credit(in: "en"))
     }
 
+    @Test func theLinksPointAtTheWebsite() {
+        #expect(SnotraLinks.website.absoluteString == "https://snotra-ai.dev")
+        #expect(SnotraLinks.legalNotice.absoluteString == "https://snotra-ai.dev/impressum")
+        #expect(SnotraLinks.privacyPolicy.absoluteString == "https://snotra-ai.dev/datenschutz")
+    }
+
+    @Test(arguments: ["en", "de"])
+    func theIntroNamesSnotraAgent(language: String) {
+        #expect(Self.localized(SnotraLinks.intro, in: language).contains("Snotra Agent"))
+    }
+
+    @Test func theIntroIsTranslated() {
+        #expect(Self.localized(SnotraLinks.intro, in: "de") != Self.localized(SnotraLinks.intro, in: "en"))
+    }
+
     private static func credit(in language: String) -> String {
-        var text = WordListCredit.text
+        localized(WordListCredit.text, in: language)
+    }
+
+    private static func localized(_ resource: LocalizedStringResource, in language: String) -> String {
+        var text = resource
         text.locale = Locale(identifier: language)
         return String(localized: text)
     }
