@@ -152,4 +152,62 @@ struct MarkdownBlocksTests {
     @Test func aHashWithoutASpaceIsNoHeading() {
         #expect(MarkdownBlock.blocks("#1194 is merged") == [.prose("#1194 is merged")])
     }
+
+    @Test func aTableKeepsItsColumnsAndTheirAlignment() {
+        let text = """
+        Results:
+        | Test | Time | Status |
+        |:-----|:----:|-------:|
+        | `a \\| b` | 1 s | **ok** |
+        | short |
+        After.
+        """
+        #expect(MarkdownBlock.blocks(text) == [
+            .prose("Results:"),
+            .table(.init(header: ["Test", "Time", "Status"], alignments: [.leading, .center, .trailing],
+                         rows: [["`a | b`", "1 s", "**ok**"], ["short", "", ""]])),
+            .prose("After."),
+        ])
+    }
+
+    @Test func aTableWithoutOuterPipesIsATableToo() {
+        #expect(MarkdownBlock.blocks("a | b\n--- | ---\n1 | 2") == [
+            .table(.init(header: ["a", "b"], alignments: [.leading, .leading], rows: [["1", "2"]])),
+        ])
+    }
+
+    @Test func aHeaderWhoseDelimiterHasNotArrivedYetStaysProse() {
+        #expect(MarkdownBlock.blocks("| a | b |") == [.prose("| a | b |")])
+        #expect(MarkdownBlock.blocks("| a | b |\n| --- |") == [.prose("| a | b |\n| --- |")])
+    }
+
+    @Test func listsKeepTheirMarkersAndNesting() {
+        let text = """
+        Steps:
+        - First
+          - Nested
+        * Second
+          goes on
+        1. One
+        2) Two
+        """
+        #expect(MarkdownBlock.blocks(text) == [
+            .prose("Steps:"),
+            .list([
+                .init(marker: "•", text: "First"),
+                .init(marker: "•", text: "Nested", level: 1),
+                .init(marker: "•", text: "Second\ngoes on"),
+                .init(marker: "1.", text: "One"),
+                .init(marker: "2.", text: "Two"),
+            ]),
+        ])
+    }
+
+    @Test func quotesAndRulesStandApart() {
+        #expect(MarkdownBlock.blocks("> Quoted\n> on.\n\n---\n**bold**") == [
+            .quote("Quoted\non."),
+            .rule,
+            .prose("**bold**"),
+        ])
+    }
 }
