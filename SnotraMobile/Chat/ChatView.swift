@@ -9,6 +9,7 @@ struct ChatView: View {
     @State private var composerGeneration = 0
     @State private var refusal: ChatModel.SendRefusal?
     @State private var approvalRefusal: ChatModel.ApprovalRefusal?
+    @State private var isConfigurationPresented = false
     @FocusState private var composerFocused: Bool
 
     init(mirror: DesktopMirror, route: ChatRoute) {
@@ -18,17 +19,27 @@ struct ChatView: View {
 
     private var transcript: ChatTranscript { model.transcript }
     private var workspaceActive: Bool { mirror.activeWorkspaceId == model.workspaceId }
+    private var title: String { transcript.title.isEmpty ? String(localized: "New chat") : transcript.title }
 
     var body: some View {
         content
             .scrollContentBackground(.hidden)
             .background(Color.background)
-            .navigationTitle(transcript.title.isEmpty ? String(localized: "New chat") : transcript.title)
+            .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .principal) { titleView }
+            }
+            .sheet(isPresented: $isConfigurationPresented) {
+                if let configuration = model.configuration {
+                    ChatConfigurationView(configuration: configuration)
+                }
+            }
             .safeAreaInset(edge: .bottom) { composer }
             .task {
                 mirror.attach(model)
                 await model.open()
+                await model.loadConfiguration()
             }
             .onDisappear {
                 mirror.detach(model)
@@ -138,6 +149,32 @@ struct ChatView: View {
     }
 
     private static let bottom = "bottom"
+
+    /// The chat's title with its model below it; tapping it shows the rest of
+    /// the chat's configuration once the desktop described it.
+    @ViewBuilder private var titleView: some View {
+        let label = VStack(spacing: 0) {
+            Text(title)
+                .font(.headline)
+                .lineLimit(1)
+            if let modelLabel = model.configuration?.modelLabel {
+                Text(modelLabel)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .accessibilityIdentifier("chat.model")
+            }
+        }
+        if model.configuration != nil {
+            Button { isConfigurationPresented = true } label: { label }
+                .buttonStyle(.plain)
+                .accessibilityElement(children: .combine)
+                .accessibilityHint("Shows the chat's settings")
+                .accessibilityIdentifier("chat.title")
+        } else {
+            label
+        }
+    }
 
     @ViewBuilder private var composer: some View {
         if model.loading == .loaded {
