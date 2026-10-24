@@ -130,7 +130,7 @@ struct ChatModelTests {
         desk.answers["message.send"] = [.success(.object(["runId": "r1", "messageId": "m0"]))]
         #expect(await chat.send("Hello") == nil)
         #expect(!chat.isNew)
-        #expect(desk.calls.map(\.method) == ["message.send", "chat.open", "chat.open", "chat.open"])
+        #expect(desk.calls.map(\.method) == ["message.send", "chat.open", "chat.open", "chat.open", "chat.configuration"])
         #expect(chat.transcript.isRunning)
     }
 
@@ -153,6 +153,66 @@ struct ChatModelTests {
         chat.apply("chat.progress", .object(["chatId": "c1", "runId": "r1", "type": "run-end"]))
         #expect(await waitFor { chat.transcript.messages.last?.text == "Hello back, stored" })
         #expect(!chat.transcript.isRunning)
+    }
+
+    static func configuration(model: String, mode: String = "smart") -> JSONValue {
+        .object([
+            "model": .object(["label": .string(model)]), "mode": .string(mode), "reasoning": "high",
+            "skills": .array([.object(["name": "release-notes", "state": "on"]), .object(["name": "broken", "state": "invalid"])]),
+            "tools": .array([.object(["name": "read_file", "on": true]), .object(["name": "shell", "on": false])]),
+        ])
+    }
+
+    @Test func theConfigurationNamesTheChatsModel() async {
+        let chat = model()
+        desk.answers["chat.configuration"] = [.success(Self.configuration(model: "claude-sonnet-4-5", mode: "ask-all"))]
+        await chat.loadConfiguration()
+        #expect(desk.calls.last?.method == "chat.configuration")
+        #expect(desk.calls.last?.params == .object(["chatId": "c1"]))
+        let configuration = chat.configuration
+        #expect(configuration?.modelLabel == "claude-sonnet-4-5")
+        #expect(configuration?.mode == "ask-all")
+        #expect(configuration?.reasoning == "high")
+        #expect(configuration?.skills.map(\.state) == ["on", "invalid"])
+        #expect(configuration?.tools.map(\.on) == [true, false])
+    }
+
+    @Test func aModelWithoutLabelShowsNone() async {
+        let chat = model()
+        desk.answers["chat.configuration"] = [.success(Self.configuration(model: ""))]
+        await chat.loadConfiguration()
+        #expect(chat.configuration != nil)
+        #expect(chat.configuration?.modelLabel == nil)
+    }
+
+    @Test func aFailedAnswerKeepsTheKnownConfiguration() async {
+        let chat = model()
+        desk.answers["chat.configuration"] = [.success(Self.configuration(model: "gpt-5")), .failure(.timedOut)]
+        await chat.loadConfiguration()
+        await chat.loadConfiguration()
+        #expect(chat.configuration?.modelLabel == "gpt-5")
+        desk.answers["chat.configuration"] = [.success(.object(["model": "not an object"]))]
+        await chat.loadConfiguration()
+        #expect(chat.configuration?.modelLabel == "gpt-5")
+    }
+
+    @Test func aNewChatAsksForNoConfigurationBeforeItIsSaved() async {
+        let chat = model(isNew: true)
+        await chat.loadConfiguration()
+        #expect(desk.calls.isEmpty)
+        #expect(chat.configuration == nil)
+    }
+
+    @Test func theEndOfATurnReadsTheConfigurationAgain() async {
+        let chat = model()
+        desk.answers["chat.configuration"] = [.success(Self.configuration(model: "claude-sonnet-4-5"))]
+        await chat.open()
+        await chat.loadConfiguration()
+        // Switched at the desktop while the turn ran.
+        desk.answers["chat.configuration"] = [.success(Self.configuration(model: "claude-opus-4-5"))]
+        chat.apply("chat.delta", .object(["chatId": "c1", "runId": "r1", "text": "Done"]))
+        chat.apply("chat.progress", .object(["chatId": "c1", "runId": "r1", "type": "run-end"]))
+        #expect(await waitFor { chat.configuration?.modelLabel == "claude-opus-4-5" })
     }
 
     @Test func theMirrorHandsAChatItsEventsWhileAttached() async {

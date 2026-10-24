@@ -51,6 +51,8 @@ final class ChatModel {
     private(set) var isNew: Bool
     /// The cards an answer is on its way for.
     private(set) var answering: Set<String> = []
+    /// What the desktop runs the chat with; nil until it answered once.
+    private(set) var configuration: ChatConfiguration?
 
     private let call: DesktopMirror.Call
     private let presence: any UserPresence
@@ -80,6 +82,16 @@ final class ChatModel {
             if case .loaded = loading { return }
             loading = .failed(error)
         }
+    }
+
+    /// `chat.configuration`. The desktop announces no change, so this is asked
+    /// again whenever the chat opens and after each turn; a failed answer
+    /// keeps what was known.
+    func loadConfiguration() async {
+        guard !isNew else { return }
+        guard let answer = try? await call("chat.configuration", .object(["chatId": .string(chatId)])),
+              let configuration = try? answer.decoded(as: ChatConfiguration.self) else { return }
+        self.configuration = configuration
     }
 
     /// `chat.close`; the chat's events stop.
@@ -128,6 +140,7 @@ final class ChatModel {
             if isNew {
                 isNew = false
                 await subscribeOnceSaved()
+                await loadConfiguration()
             }
             return nil
         } catch {
@@ -187,12 +200,16 @@ final class ChatModel {
     /// on its own, so that the events behind this one are not held up.
     func apply(_ method: String, _ params: JSONValue) {
         guard transcript.apply(method, params) else { return }
-        Task { await reloadAfterTurn() }
+        Task {
+            await reloadAfterTurn()
+            await loadConfiguration()
+        }
     }
 
     /// A new session, or the desktop could not deliver everything: open again (§17, `session.resync`).
     func sessionStarted() async {
         await open()
+        await loadConfiguration()
     }
 
     /// A new chat exists at the desktop once its first question is saved; only
