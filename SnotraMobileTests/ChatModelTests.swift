@@ -196,10 +196,18 @@ struct ChatModelTests {
         #expect(chat.configuration?.modelLabel == "gpt-5")
     }
 
-    @Test func aNewChatAsksForNoConfigurationBeforeItIsSaved() async {
+    @Test func aNewChatShowsTheModelItWillStartWith() async {
         let chat = model(isNew: true)
+        desk.answers["chat.configuration"] = [.success(Self.configuration(model: "claude-sonnet-4-5"))]
         await chat.loadConfiguration()
-        #expect(desk.calls.isEmpty)
+        #expect(desk.calls.map(\.method) == ["chat.configuration"])
+        #expect(chat.configuration?.modelLabel == "claude-sonnet-4-5")
+    }
+
+    @Test func aDesktopThatDoesNotKnowTheNewChatYetShowsNoModel() async {
+        let chat = model(isNew: true)
+        desk.answers["chat.configuration"] = [.failure(.desktop(code: -32002, reason: "not-found", message: "", why: nil))]
+        await chat.loadConfiguration()
         #expect(chat.configuration == nil)
     }
 
