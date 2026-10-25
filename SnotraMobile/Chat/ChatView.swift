@@ -150,15 +150,15 @@ struct ChatView: View {
 
     private static let bottom = "bottom"
 
-    /// The chat's title with its model below it; tapping it shows the rest of
-    /// the chat's configuration once the desktop described it.
+    /// The chat's title with its model and reasoning level below it; tapping
+    /// it shows the rest of the chat's configuration once the desktop described it.
     @ViewBuilder private var titleView: some View {
         let label = VStack(spacing: 0) {
             Text(title)
                 .font(.headline)
                 .lineLimit(1)
-            if let modelLabel = model.configuration?.modelLabel {
-                Text(modelLabel)
+            if let summary = model.configuration?.summary {
+                Text(summary)
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)

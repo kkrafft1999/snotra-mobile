@@ -177,6 +177,17 @@ struct ChatModelTests {
         #expect(configuration?.tools.map(\.on) == [true, false])
     }
 
+    @Test func theSubtitleNamesTheReasoningLevelWhenThereIsOne() throws {
+        let withLevel = try Self.configuration(model: "claude-sonnet-4-5").decoded(as: ChatConfiguration.self)
+        #expect(withLevel.summary == "claude-sonnet-4-5 · high")
+        let withoutLevel = try JSONValue.object([
+            "model": .object(["label": "gpt-4o"]), "mode": "smart", "skills": .array([]), "tools": .array([]),
+        ]).decoded(as: ChatConfiguration.self)
+        #expect(withoutLevel.summary == "gpt-4o")
+        let withoutModel = try Self.configuration(model: "").decoded(as: ChatConfiguration.self)
+        #expect(withoutModel.summary == nil)
+    }
+
     @Test func aModelWithoutLabelShowsNone() async {
         let chat = model()
         desk.answers["chat.configuration"] = [.success(Self.configuration(model: ""))]

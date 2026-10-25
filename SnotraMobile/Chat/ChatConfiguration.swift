@@ -32,6 +32,14 @@ struct ChatConfiguration: Decodable, Equatable, Sendable {
         model.label.isEmpty ? nil : model.label
     }
 
+    /// The line under the chat's title: the model, with its reasoning level as
+    /// the desktop's model button shows it (`claude-sonnet-4-5 · high`).
+    var summary: String? {
+        guard let modelLabel else { return nil }
+        guard let reasoning, !reasoning.isEmpty else { return modelLabel }
+        return "\(modelLabel) · \(reasoning)"
+    }
+
     /// The permission mode under the name the desktop gives it.
     var modeName: String {
         switch mode {
