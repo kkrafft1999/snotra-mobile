@@ -86,9 +86,10 @@ final class ChatModel {
 
     /// `chat.configuration`. The desktop announces no change, so this is asked
     /// again whenever the chat opens and after each turn; a failed answer
-    /// keeps what was known.
+    /// keeps what was known. A chat from `chat.new` is asked too: the desktop
+    /// describes what it would start with (snotra#1256), an older one answers
+    /// `not-found` and nothing shows.
     func loadConfiguration() async {
-        guard !isNew else { return }
         guard let answer = try? await call("chat.configuration", .object(["chatId": .string(chatId)])),
               let configuration = try? answer.decoded(as: ChatConfiguration.self) else { return }
         self.configuration = configuration
