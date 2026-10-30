@@ -31,8 +31,8 @@ struct ChatView: View {
                 ToolbarItem(placement: .principal) { titleView }
             }
             .sheet(isPresented: $isConfigurationPresented) {
-                if let configuration = model.configuration {
-                    ChatConfigurationView(configuration: configuration)
+                if model.configuration != nil {
+                    ChatConfigurationView(model: model)
                 }
             }
             .safeAreaInset(edge: .bottom) { composer }

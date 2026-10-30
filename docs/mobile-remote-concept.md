@@ -428,7 +428,10 @@ channel catalogue. The shape, as far as this concept needs it:
 Two rules carry the rest:
 
 - **The phone sends ids, the desktop decides.** No path, no tool payload, no
-  setting reaches the desktop from the phone.
+  setting reaches the desktop from the phone — with one exception: a chat's
+  reasoning level (`chat.setReasoning`, snotra#1304), one of the levels the
+  desktop listed for that chat. It grants nothing; it only changes a turn's
+  depth and cost. Model, mode, skills and tools stay with the desktop.
 - **The desktop sends what it would show, not what it holds.** Display DTOs,
   like the renderer receives — the phone needs no provider knowledge and no
   history to resend.

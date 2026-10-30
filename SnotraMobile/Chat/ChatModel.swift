@@ -53,6 +53,8 @@ final class ChatModel {
     private(set) var answering: Set<String> = []
     /// What the desktop runs the chat with; nil until it answered once.
     private(set) var configuration: ChatConfiguration?
+    /// A reasoning level on its way to the desktop.
+    private(set) var settingReasoning = false
 
     private let call: DesktopMirror.Call
     private let presence: any UserPresence
@@ -96,6 +98,24 @@ final class ChatModel {
     }
 
     /// `chat.close`; the chat's events stop.
+    /// `chat.setReasoning` (snotra#1304): the level the chat's next turn runs
+    /// with. False when the desktop did not take it; the configuration is
+    /// read again then, so the sheet shows what holds.
+    func setReasoning(_ level: String) async -> Bool {
+        guard let configuration, configuration.reasoning != level,
+              configuration.reasoningLevels?.contains(level) == true, !settingReasoning else { return true }
+        settingReasoning = true
+        defer { settingReasoning = false }
+        do throws(RemoteCallError) {
+            let answer = try await call("chat.setReasoning", .object(["chatId": .string(chatId), "level": .string(level)]))
+            self.configuration?.reasoning = answer["reasoning"]?.stringValue ?? level
+            return true
+        } catch {
+            await loadConfiguration()
+            return false
+        }
+    }
+
     func close() async {
         guard !isNew else { return }
         _ = try? await call("chat.close", .object(["chatId": .string(chatId)]))

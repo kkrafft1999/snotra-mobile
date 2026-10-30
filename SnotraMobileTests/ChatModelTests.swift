@@ -188,6 +188,55 @@ struct ChatModelTests {
         #expect(withoutModel.summary == nil)
     }
 
+    static func choosable(level: String = "high") -> JSONValue {
+        .object([
+            "model": .object(["label": "claude-opus-5-5"]), "mode": "smart", "reasoning": .string(level),
+            "reasoningLevels": .array(["low", "medium", "high"]), "skills": .array([]), "tools": .array([]),
+        ])
+    }
+
+    @Test func theLevelCanBeChosenOnlyWhenTheDesktopListsLevels() throws {
+        #expect(try Self.choosable().decoded(as: ChatConfiguration.self).canChooseReasoning)
+        // An older desktop sends no levels: the row stays read only.
+        #expect(try !Self.configuration(model: "gpt-5").decoded(as: ChatConfiguration.self).canChooseReasoning)
+        let single = try JSONValue.object([
+            "model": .object(["label": "o3"]), "mode": "smart", "reasoning": "on",
+            "reasoningLevels": .array(["on"]), "skills": .array([]), "tools": .array([]),
+        ]).decoded(as: ChatConfiguration.self)
+        #expect(!single.canChooseReasoning)
+    }
+
+    @Test func aChosenLevelGoesToTheDesktopAndShowsOnceTaken() async {
+        let chat = model()
+        desk.answers["chat.configuration"] = [.success(Self.choosable())]
+        await chat.loadConfiguration()
+        desk.answers["chat.setReasoning"] = [.success(.object(["reasoning": "low"]))]
+        #expect(await chat.setReasoning("low"))
+        #expect(desk.calls.last?.method == "chat.setReasoning")
+        #expect(desk.calls.last?.params == .object(["chatId": "c1", "level": "low"]))
+        #expect(chat.configuration?.reasoning == "low")
+        #expect(chat.configuration?.summary == "claude-opus-5-5 · low")
+    }
+
+    @Test func aLevelOutsideTheListOrTheSameOneSendsNothing() async {
+        let chat = model()
+        desk.answers["chat.configuration"] = [.success(Self.choosable())]
+        await chat.loadConfiguration()
+        #expect(await chat.setReasoning("high"))
+        #expect(await chat.setReasoning("max"))
+        #expect(desk.calls.map(\.method) == ["chat.configuration"])
+    }
+
+    @Test func aRefusedLevelReadsTheConfigurationAgain() async {
+        let chat = model()
+        desk.answers["chat.configuration"] = [.success(Self.choosable()), .success(Self.choosable(level: "medium"))]
+        await chat.loadConfiguration()
+        desk.answers["chat.setReasoning"] = [.failure(.desktop(code: -32602, reason: "invalid-params", message: "", why: nil))]
+        #expect(await !chat.setReasoning("low"))
+        #expect(desk.calls.map(\.method) == ["chat.configuration", "chat.setReasoning", "chat.configuration"])
+        #expect(chat.configuration?.reasoning == "medium")
+    }
+
     @Test func aModelWithoutLabelShowsNone() async {
         let chat = model()
         desk.answers["chat.configuration"] = [.success(Self.configuration(model: ""))]
