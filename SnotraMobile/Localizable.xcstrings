@@ -71,6 +71,16 @@
         }
       }
     },
+    "A new reasoning level applies from the next message. Change the rest on your desktop." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein neues Reasoning-Level gilt ab der nächsten Nachricht. Den Rest änderst du auf deinem Desktop."
+          }
+        }
+      }
+    },
     "About Snotra" : {
       "localizations" : {
         "de" : {
@@ -1331,6 +1341,16 @@
         }
       }
     },
+    "The chat keeps the level it had." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Chat behält sein bisheriges Level."
+          }
+        }
+      }
+    },
     "The code has expired or was already used" : {
       "localizations" : {
         "de" : {
@@ -1367,6 +1387,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Das Koppeln wurde auf deinem Desktop abgelehnt oder abgebrochen."
+          }
+        }
+      }
+    },
+    "The reasoning level could not be changed" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Reasoning-Level ließ sich nicht ändern"
           }
         }
       }

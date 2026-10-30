@@ -1,8 +1,9 @@
 import Foundation
 
 /// What Snotra on the desktop runs a chat with, as `chat.configuration`
-/// describes it (remote-interface.md §8.1). Read only: the phone shows it,
-/// changing it stays at the desktop (O6).
+/// describes it (remote-interface.md §8.1). The phone shows it; of it only
+/// the reasoning level can be changed from here, with `chat.setReasoning`
+/// (snotra#1304) — the rest stays at the desktop (O6).
 struct ChatConfiguration: Decodable, Equatable, Sendable {
     struct Model: Decodable, Equatable, Sendable {
         let label: String
@@ -22,8 +23,11 @@ struct ChatConfiguration: Decodable, Equatable, Sendable {
     let model: Model
     /// `smart`, `ask-all` or `auto`.
     let mode: String
-    /// The reasoning level as the desktop names it; absent when the model takes none.
-    let reasoning: String?
+    /// The level the chat runs with, as the desktop names it; absent when the model takes none.
+    var reasoning: String?
+    /// The levels the chat's model takes; absent when it takes none, and from
+    /// a desktop that cannot change the level from the phone.
+    let reasoningLevels: [String]?
     let skills: [Skill]
     let tools: [Tool]
 
@@ -38,6 +42,11 @@ struct ChatConfiguration: Decodable, Equatable, Sendable {
         guard let modelLabel else { return nil }
         guard let reasoning, !reasoning.isEmpty else { return modelLabel }
         return "\(modelLabel) · \(reasoning)"
+    }
+
+    /// Whether the phone may choose among the levels: the desktop lists more than one.
+    var canChooseReasoning: Bool {
+        reasoning != nil && (reasoningLevels?.count ?? 0) > 1
     }
 
     /// The permission mode under the name the desktop gives it.
