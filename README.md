@@ -2,7 +2,7 @@
 
 An iPhone app for [Snotra Agent](https://github.com/kkrafft1999/snotra): when you step away from your desk, it lets you follow and drive the chats running on your desktop. You can switch workspaces and chats, watch an answer come in live, write a message, stop a run, and answer a tool approval once.
 
-**Status:** not implemented yet. This repository holds the app once work starts.
+**Status:** in TestFlight. The app pairs with Snotra Agent through the production relay `relay.snotra-ai.dev` and does everything above. On the desktop, pairing a phone is still behind developer mode until remote access is opened for everyone ([kkrafft1999/snotra#1211](https://github.com/kkrafft1999/snotra/issues/1211)).
 
 ## How it works
 
