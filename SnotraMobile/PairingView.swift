@@ -177,11 +177,13 @@ extension PairingFlow.Failure {
         case .unknownRelay: "This code points to an unknown relay"
         case .expired: "The code has expired or was already used"
         case .unreachable: "Can't reach the relay"
+        case .relayRefused: "The relay refused the pairing"
         case .notAllowed: "Not allowed on the desktop"
         case .notVerified: "Pairing failed"
         case .keys: "This iPhone couldn't keep its keys"
         case .deviceUnsupported: "This iPhone can't pair"
         case .appNotAccepted: "The relay didn't accept this app"
+        case .deviceFailure: "This iPhone couldn't vouch for the app"
         }
     }
 
@@ -193,11 +195,13 @@ extension PairingFlow.Failure {
         case .unknownRelay: "The app only pairs through Snotra's own relay."
         case .expired: "Start pairing again on your desktop to get a new code."
         case .unreachable: "Check your internet connection and try again."
+        case .relayRefused: "Try again with a new code. If it keeps happening, the relay may be misconfigured."
         case .notAllowed: "The pairing was denied or cancelled on your desktop."
         case .notVerified: "Your desktop's keys could not be verified, so nothing was kept. Start again on your desktop."
         case .keys: "Try again. If it keeps failing, restart the iPhone."
         case .deviceUnsupported: "Pairing needs App Attest, which this iPhone or this copy of the app doesn't offer. Update iOS, or install the app from TestFlight or the App Store."
-        case .appNotAccepted: "Apple couldn't confirm that this copy of the app is genuine. Try again later, or install the app again from TestFlight or the App Store."
+        case .appNotAccepted: "Apple couldn't confirm that this copy of the app is genuine. Pairing works only with the app from TestFlight or the App Store. If that's where it came from, try again later."
+        case .deviceFailure: "iOS couldn't run its security check for the app. Restart the iPhone and try again."
         }
     }
 }

@@ -181,12 +181,12 @@
         }
       }
     },
-    "Apple couldn't confirm that this copy of the app is genuine. Try again later, or install the app again from TestFlight or the App Store." : {
+    "Apple couldn't confirm that this copy of the app is genuine. Pairing works only with the app from TestFlight or the App Store. If that's where it came from, try again later." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Apple konnte nicht bestätigen, dass diese Kopie der App echt ist. Versuch es später noch einmal oder installiere die App neu über TestFlight oder den App Store."
+            "value" : "Apple konnte nicht bestätigen, dass diese Kopie der App echt ist. Koppeln geht nur mit der App aus TestFlight oder dem App Store. Hast du sie von dort, versuch es später noch einmal."
           }
         }
       }
@@ -1411,6 +1411,16 @@
         }
       }
     },
+    "The relay refused the pairing" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Relay hat das Koppeln abgelehnt"
+          }
+        }
+      }
+    },
     "The words you compare when pairing come from the EFF short word list 2.0, © 2016 Electronic Frontier Foundation, licensed under Creative Commons Attribution 3.0 United States (CC BY 3.0 US). The dice numbers were dropped; order and spelling are as published." : {
       "localizations" : {
         "de" : {
@@ -1501,6 +1511,16 @@
         }
       }
     },
+    "This iPhone couldn't vouch for the app" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dieses iPhone konnte die App nicht bestätigen"
+          }
+        }
+      }
+    },
     "This iPhone is now paired with Snotra on your desktop." : {
       "localizations" : {
         "de" : {
@@ -1537,6 +1557,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Erneut versuchen"
+          }
+        }
+      }
+    },
+    "Try again with a new code. If it keeps happening, the relay may be misconfigured." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versuch es mit einem neuen Code noch einmal. Passiert das immer wieder, ist das Relay vermutlich falsch eingerichtet."
           }
         }
       }
@@ -1797,6 +1827,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Deine Workspaces erscheinen gleich."
+          }
+        }
+      }
+    },
+    "iOS couldn't run its security check for the app. Restart the iPhone and try again." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iOS konnte die Sicherheitsprüfung für die App nicht ausführen. Starte das iPhone neu und versuch es noch einmal."
           }
         }
       }

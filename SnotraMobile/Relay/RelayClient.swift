@@ -1,4 +1,5 @@
 import Foundation
+import os
 
 /// The phone's calls to the relay's endpoints (remote protocol §5) and to the
 /// Identity Toolkit. Holds no state; every token it hands out lives in memory
@@ -96,10 +97,20 @@ struct RelayClient: Sendable {
         guard data.count <= Self.maxResponseBytes else { throw RelayError.invalidResponse }
         let answer = data.isEmpty ? JSONValue.null : ((try? JSONValue(data: data)) ?? .null)
         guard (200..<300).contains(response.statusCode) else {
-            throw RelayError(status: response.statusCode, reason: answer["error"]?["reason"]?.stringValue)
+            let reason = answer["error"]?["reason"]?.stringValue
+            // The relay names a reason; Google's APIs a status such as `PERMISSION_DENIED`.
+            let named = (reason ?? answer["error"]?["status"]?.stringValue).map { String($0.prefix(40)) }
+            Logger.relay.error("""
+                \(method, privacy: .public) \(LogText.path(of: url), privacy: .public) answered \
+                \(response.statusCode, privacy: .public) \(named ?? "without a reason", privacy: .public)
+                """)
+            throw RelayError(status: response.statusCode, reason: reason)
         }
         if !data.isEmpty {
-            guard case .object = answer else { throw RelayError.invalidResponse }
+            guard case .object = answer else {
+                Logger.relay.error("\(method, privacy: .public) \(LogText.path(of: url), privacy: .public) answered no JSON object")
+                throw RelayError.invalidResponse
+            }
         }
         return (answer, Self.date(of: response))
     }

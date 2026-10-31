@@ -51,6 +51,9 @@ enum AppCheckError: Error, Equatable, Sendable {
     case unsupported
     /// Apple or App Check would not vouch for this app.
     case refused
+    /// App Attest failed on the device itself — iOS could not read the key it
+    /// attests with, say. A restart cures it, a reinstall does not (#63).
+    case deviceFailure
 }
 
 #if DEBUG

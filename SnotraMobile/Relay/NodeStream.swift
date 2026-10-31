@@ -1,4 +1,5 @@
 import Foundation
+import os
 
 /// What one streamed node of the database says (spec §12 step 2).
 enum NodeEvent: Equatable, Sendable {
@@ -21,7 +22,10 @@ extension RelayClient {
         var request = URLRequest(url: endpoint.databaseNodeURL(channelId: channelId, node: node, idToken: idToken))
         request.setValue("text/event-stream", forHTTPHeaderField: "Accept")
         let (response, body) = try await transport.stream(request)
-        guard response.statusCode == 200 else { throw RelayError(status: response.statusCode, reason: nil) }
+        guard response.statusCode == 200 else {
+            Logger.relay.error("Stream of \(node, privacy: .public) answered \(response.statusCode, privacy: .public)")
+            throw RelayError(status: response.statusCode, reason: nil)
+        }
         return AsyncThrowingStream { continuation in
             let task = Task {
                 var parser = EventStreamParser(maxEventBytes: maxEventBytes)

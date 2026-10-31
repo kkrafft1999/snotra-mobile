@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import os
 
 /// Part 1 of the protocol from the phone's side (spec §8, steps 15–37): from
 /// the code the desktop shows to a paired channel the phone keeps.
@@ -23,8 +24,10 @@ final class PairingFlow {
         case unknownRelay
         /// `404`: the code ran out or was used.
         case expired
-        /// `401`, `429`, `503` or no network.
+        /// No answer at all, or one that says to come back later: `429`, `503`.
         case unreachable
+        /// The relay answered, but refused: `401`, `403`, a malformed answer.
+        case relayRefused
         /// The channel vanished before `paired`: denied or cancelled at the desktop.
         case notAllowed
         /// A wrong `MAC_D`, or `paired` without one: the keys are not the desktop's.
@@ -35,9 +38,17 @@ final class PairingFlow {
         case deviceUnsupported
         /// Apple or App Check would not vouch for this copy of the app.
         case appNotAccepted
+        /// App Attest failed on the iPhone itself.
+        case deviceFailure
+    }
+
+    /// Where a pairing stood when it failed, for the log.
+    private enum Stage: String {
+        case code, keys, lookUp = "look-up", claim, confirmation, save
     }
 
     private(set) var step: Step = .entering
+    private var stage = Stage.code
 
     private let relays: [RelayEndpoint]
     private let transport: any RelayTransport
@@ -95,10 +106,12 @@ final class PairingFlow {
         running?.cancel()
         await running?.value
         await abandonClaim()
+        stage = .code
         step = .entering
     }
 
     func retry() {
+        stage = .code
         step = .entering
     }
 
@@ -107,6 +120,7 @@ final class PairingFlow {
     private func start(_ code: PairingCode, at relay: RelayEndpoint) {
         guard running == nil else { return }
         step = .claiming
+        stage = .keys
         running = Task {
             await run(code, at: relay)
             running = nil
@@ -120,13 +134,15 @@ final class PairingFlow {
         do {
             // Steps 15–16: fresh keys for every pairing.
             let keys: DeviceKeys
-            do { keys = try keyStore.create() } catch { return fail(.keys) }
+            do { keys = try keyStore.create() } catch { return fail(.keys, cause: error) }
             let sign: @Sendable (Data) throws -> Data = { [keys] in try keys.sign($0) }
 
             // Steps 17–22.
+            stage = .lookUp
             let pairing = try await client.lookUp(pairingId: code.pairingId)
             let transcript = PairingMAC.transcript(
                 channelId: pairing.channelId, desktopKeys: pairing.desktopKeys, phoneKeys: keys.bundle)
+            stage = .claim
             let session = try await client.claim(
                 pairingId: code.pairingId, channelId: pairing.channelId, phoneKeys: keys.bundle,
                 macP: PairingMAC.phone(code: code, transcript: transcript), sign: sign)
@@ -137,15 +153,17 @@ final class PairingFlow {
             step = .comparing(SafetyPhrase(desktopKeys: pairing.desktopKeys, phoneKeys: keys.bundle, wordList: wordList))
 
             // Steps 36–37.
+            stage = .confirmation
             let macD = try await awaitPaired(client: client, channelId: pairing.channelId, idToken: session.idToken)
             guard let macD, PairingMAC.isValidDesktopMAC(macD, code: code, transcript: transcript) else {
                 await abandonClaim()
                 return fail(.notVerified)
             }
+            stage = .save
             let record = PairingRecord(relayHost: relay.host, channelId: pairing.channelId, desktopKeys: pairing.desktopKeys)
             do { try pairingStore.save(record) } catch {
                 await abandonClaim()
-                return fail(.keys)
+                return fail(.keys, cause: error)
             }
             claimed = nil
             step = .paired(record)
@@ -153,17 +171,31 @@ final class PairingFlow {
             return
         } catch RelayError.notFound {
             await dropKeys()
-            fail(claimed == nil ? .expired : .notAllowed)
+            fail(claimed == nil ? .expired : .notAllowed, cause: RelayError.notFound)
         } catch let error as AppCheckError {
             await dropKeys()
-            fail(error == .unsupported ? .deviceUnsupported : .appNotAccepted)
+            fail(Self.failure(of: error), cause: error)
         } catch is ChannelGone {
             claimed = nil
             await dropKeys()
             fail(.notAllowed)
         } catch {
             await abandonClaim()
-            fail(.unreachable)
+            fail(Self.failure(of: error), cause: error)
+        }
+    }
+
+    /// What the person is told about an error the relay, App Check or App
+    /// Attest ended the pairing with. *Can't reach* only when nothing came back
+    /// or the relay asked to come later; any other answer is a refusal (#63).
+    nonisolated static func failure(of error: any Error) -> Failure {
+        switch error {
+        case AppCheckError.unsupported: .deviceUnsupported
+        case AppCheckError.refused: .appNotAccepted
+        case AppCheckError.deviceFailure: .deviceFailure
+        case let error as RelayError where error.isTransient: .unreachable
+        case is RelayError: .relayRefused
+        default: .unreachable
         }
     }
 
@@ -211,7 +243,11 @@ final class PairingFlow {
         try? keyStore.delete()
     }
 
-    private func fail(_ failure: Failure) {
+    private func fail(_ failure: Failure, cause: (any Error)? = nil) {
+        Logger.pairing.error("""
+            Pairing failed at \(self.stage.rawValue, privacy: .public): \(String(describing: failure), privacy: .public), \
+            cause \(cause.map(LogText.error) ?? "none", privacy: .public)
+            """)
         step = .failed(failure)
     }
 }
