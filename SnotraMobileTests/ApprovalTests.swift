@@ -260,6 +260,6 @@ struct ApprovalAnswerTests {
 
     @Test func helloAsksForTheCards() {
         let params = SessionHello.params(locale: "en", version: "1.0")
-        #expect(params["capabilities"] == .array(["approvals"]))
+        #expect(params["capabilities"] == .array(["approvals", "knowledge-cards"]))
     }
 }

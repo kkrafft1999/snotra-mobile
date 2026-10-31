@@ -61,6 +61,16 @@
         }
       }
     },
+    "A command changed a knowledge file" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein Befehl hat eine Wissensdatei geändert"
+          }
+        }
+      }
+    },
     "A file open on your desktop has unsaved changes. Save or discard them there first." : {
       "localizations" : {
         "de" : {
@@ -81,6 +91,16 @@
         }
       }
     },
+    "AGENTS.md is read by every tool in this folder and usually shared with the team" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AGENTS.md liest jedes Werkzeug in diesem Ordner; meist mit dem Team geteilt"
+          }
+        }
+      }
+    },
     "About Snotra" : {
       "localizations" : {
         "de" : {
@@ -91,12 +111,32 @@
         }
       }
     },
+    "Added: %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hinzugefügt: %@"
+          }
+        }
+      }
+    },
     "Allow %@ once on your desktop" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ einmal auf deinem Desktop erlauben"
+          }
+        }
+      }
+    },
+    "Allow as proposed" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "So erlauben"
           }
         }
       }
@@ -161,6 +201,16 @@
         }
       }
     },
+    "Always" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Immer"
+          }
+        }
+      }
+    },
     "Always ask" : {
       "localizations" : {
         "de" : {
@@ -187,6 +237,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Apple konnte nicht bestätigen, dass diese Kopie der App echt ist. Koppeln geht nur mit der App aus TestFlight oder dem App Store. Hast du sie von dort, versuch es später noch einmal."
+          }
+        }
+      }
+    },
+    "Applies when" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gilt"
           }
         }
       }
@@ -257,6 +317,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ändern kannst du das auf deinem Desktop."
+          }
+        }
+      }
+    },
+    "Changed: %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geändert: %@"
           }
         }
       }
@@ -501,12 +571,42 @@
         }
       }
     },
+    "Earlier in this chat, a tool result or this folder's own text read like hidden instructions. Check that you want this in a file Snotra reads in every chat." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Früher in diesem Chat klang ein Tool-Ergebnis oder der eigene Text dieses Ordners wie versteckte Anweisungen. Prüf, ob du das in einer Datei haben willst, die Snotra in jedem Chat liest."
+          }
+        }
+      }
+    },
+    "Every tool here" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alle Werkzeuge hier"
+          }
+        }
+      }
+    },
     "Expired without an answer" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ohne Antwort abgelaufen"
+          }
+        }
+      }
+    },
+    "Fact" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fakt"
           }
         }
       }
@@ -571,12 +671,32 @@
         }
       }
     },
+    "Keep" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Behalten"
+          }
+        }
+      }
+    },
     "Key" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Schlüssel"
+          }
+        }
+      }
+    },
+    "Kind" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Art"
           }
         }
       }
@@ -791,6 +911,16 @@
         }
       }
     },
+    "Only you" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nur du"
+          }
+        }
+      }
+    },
     "Open" : {
       "localizations" : {
         "de" : {
@@ -921,6 +1051,16 @@
         }
       }
     },
+    "Procedure" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ablauf"
+          }
+        }
+      }
+    },
     "Reasoning" : {
       "localizations" : {
         "de" : {
@@ -947,6 +1087,46 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Auf deinem Desktop entfernt"
+          }
+        }
+      }
+    },
+    "Removed: %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entfernt: %@"
+          }
+        }
+      }
+    },
+    "Replaces: %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ersetzt: %@"
+          }
+        }
+      }
+    },
+    "Reset" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zurücksetzen"
+          }
+        }
+      }
+    },
+    "Rule" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regel"
           }
         }
       }
@@ -1067,6 +1247,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Snotra bittet um deine Freigabe"
+          }
+        }
+      }
+    },
+    "Snotra in this folder" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snotra in diesem Ordner"
           }
         }
       }
@@ -1241,6 +1431,36 @@
         }
       }
     },
+    "Snotra wants to remember a fact" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snotra möchte sich einen Fakt merken"
+          }
+        }
+      }
+    },
+    "Snotra wants to remember a procedure" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snotra möchte sich einen Ablauf merken"
+          }
+        }
+      }
+    },
+    "Snotra wants to remember a rule" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snotra möchte sich eine Regel merken"
+          }
+        }
+      }
+    },
     "Start one here or on your desktop; the chats of this workspace appear here." : {
       "localizations" : {
         "de" : {
@@ -1291,6 +1511,16 @@
         }
       }
     },
+    "Target" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ziel"
+          }
+        }
+      }
+    },
     "That isn't a Snotra pairing code" : {
       "localizations" : {
         "de" : {
@@ -1307,6 +1537,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Der Schlüssel stimmt nicht"
+          }
+        }
+      }
+    },
+    "The always-rules of this level are full: this one is fetched when it applies instead." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Immer-Regeln dieser Ebene sind voll: Diese wird stattdessen geholt, wenn sie greift."
           }
         }
       }
@@ -1491,6 +1731,36 @@
         }
       }
     },
+    "This folder brings its own instructions: %lld rules files." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dieser Ordner bringt eigene Anweisungen mit: %lld Regeldateien."
+          }
+        }
+      }
+    },
+    "This folder brings its own instructions: AGENTS.md, %lld rules files." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dieser Ordner bringt eigene Anweisungen mit: AGENTS.md, %lld Regeldateien."
+          }
+        }
+      }
+    },
+    "This folder brings its own instructions: AGENTS.md." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dieser Ordner bringt eigene Anweisungen mit: AGENTS.md."
+          }
+        }
+      }
+    },
     "This iPhone can't pair" : {
       "localizations" : {
         "de" : {
@@ -1527,6 +1797,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dieses iPhone ist jetzt mit Snotra auf deinem Desktop gekoppelt."
+          }
+        }
+      }
+    },
+    "This is switched off in the settings: it is written, but applies only once it is switched on." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das ist in den Einstellungen ausgeschaltet: Es wird geschrieben, gilt aber erst, wenn du es einschaltest."
+          }
+        }
+      }
+    },
+    "To allow it, answer it on your desktop." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zum Erlauben beantworte sie auf deinem Desktop."
           }
         }
       }
@@ -1691,6 +1981,16 @@
         }
       }
     },
+    "Who reads it" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wer liest es"
+          }
+        }
+      }
+    },
     "Word list" : {
       "localizations" : {
         "de" : {
@@ -1831,12 +2131,132 @@
         }
       }
     },
+    "always: goes along with every message" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "always: geht mit jeder Nachricht mit"
+          }
+        }
+      }
+    },
+    "applies in every folder" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "gilt in jedem Ordner"
+          }
+        }
+      }
+    },
+    "applies in every folder, in every conversation" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "gilt in jedem Ordner, in jedem Gespräch"
+          }
+        }
+      }
+    },
+    "goes along with every message in this folder" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "geht in diesem Ordner mit jeder Nachricht mit"
+          }
+        }
+      }
+    },
     "iOS couldn't run its security check for the app. Restart the iPhone and try again." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "iOS konnte die Sicherheitsprüfung für die App nicht ausführen. Starte das iPhone neu und versuch es noch einmal."
+          }
+        }
+      }
+    },
+    "new · AGENTS.md is read by every tool in this folder and usually shared with the team" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "neu · AGENTS.md liest jedes Werkzeug in diesem Ordner; meist mit dem Team geteilt"
+          }
+        }
+      }
+    },
+    "new · applies in every folder" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "neu · gilt in jedem Ordner"
+          }
+        }
+      }
+    },
+    "new · read by Snotra in this folder; versioned with the folder if it is a repository" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "neu · liest Snotra in diesem Ordner; wird mit dem Ordner versioniert, wenn er ein Repository ist"
+          }
+        }
+      }
+    },
+    "project memory — Snotra reads it in every chat in this folder" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Projektgedächtnis — Snotra liest es in jedem Chat in diesem Ordner"
+          }
+        }
+      }
+    },
+    "read by Snotra in this folder; versioned with the folder if it is a repository" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "liest Snotra in diesem Ordner; wird mit dem Ordner versioniert, wenn er ein Repository ist"
+          }
+        }
+      }
+    },
+    "read by every tool in this folder, and by Snotra in every chat here" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "von jedem Werkzeug in diesem Ordner gelesen, von Snotra in jedem Chat hier"
+          }
+        }
+      }
+    },
+    "rules file — Snotra reads it in every chat in this folder" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regeldatei — Snotra liest sie in jedem Chat in diesem Ordner"
+          }
+        }
+      }
+    },
+    "skill — Snotra can load it in every chat in this folder" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skill — Snotra kann ihn in jedem Chat in diesem Ordner laden"
           }
         }
       }

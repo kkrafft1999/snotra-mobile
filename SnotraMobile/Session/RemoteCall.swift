@@ -40,7 +40,9 @@ enum SessionHello {
             "client": .object(["name": .string(clientName), "version": .string(String(version.prefix(32)))]),
             "locale": .string(locale),
             // The cards of the chats the phone follows, answered with *allow once* or *deny* (§7.4).
-            "capabilities": .array([.string("approvals")]),
+            // `knowledge-cards`: this app shows a card about a knowledge file in full
+            // (snotra#1319); without it the desktop lets the phone only deny one.
+            "capabilities": .array([.string("approvals"), .string("knowledge-cards")]),
         ])
     }
 
