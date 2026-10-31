@@ -14,19 +14,118 @@ struct ApprovalRequest: Decodable, Identifiable, Equatable, Sendable {
         /// Relative inside the workspace, a place outside it as the card names it.
         let path: String
         let sensitive: Bool
+        /// A knowledge file (snotra#1319): `agents`, `memory`, `rules` or `skills`.
+        let knowledge: String?
+        /// The rules file written says `always: true`.
+        let knowledgeAlways: Bool
 
-        init(path: String, sensitive: Bool = false) {
+        init(path: String, sensitive: Bool = false, knowledge: String? = nil, knowledgeAlways: Bool = false) {
             self.path = path
             self.sensitive = sensitive
+            self.knowledge = knowledge
+            self.knowledgeAlways = knowledgeAlways
         }
 
         init(from decoder: any Decoder) throws {
             let container = try decoder.container(keyedBy: CodingKeys.self)
             path = try container.decode(String.self, forKey: .path)
             sensitive = (try? container.decodeIfPresent(Bool.self, forKey: .sensitive)) ?? false
+            knowledge = try? container.decodeIfPresent(String.self, forKey: .knowledge)
+            knowledgeAlways = (try? container.decodeIfPresent(Bool.self, forKey: .knowledgeAlways)) ?? false
         }
 
-        private enum CodingKeys: String, CodingKey { case path, sensitive }
+        private enum CodingKeys: String, CodingKey { case path, sensitive, knowledge, knowledgeAlways }
+    }
+
+    /// A `remember` card (snotra#1276): what Snotra proposes to remember, for
+    /// whom, and where it goes. The phone shows all of it and answers it only
+    /// as proposed — re-sorting stays on the desktop.
+    struct KnowledgeCard: Decodable, Equatable, Sendable {
+        struct Place: Decodable, Equatable, Sendable {
+            let path: String
+            let exists: Bool
+        }
+
+        struct RuleFile: Decodable, Equatable, Sendable {
+            let description: String
+            let always: Bool
+        }
+
+        struct Replaced: Decodable, Equatable, Sendable {
+            let text: String
+        }
+
+        struct FolderInstructions: Decodable, Equatable, Sendable {
+            let agentsMd: Bool
+            let rulesFiles: Int
+        }
+
+        /// `fact`, `rule` or `instruction`.
+        let kind: String
+        /// `user`, `workspace` or `team`.
+        let scope: String
+        let entry: String
+        let topic: String?
+        let description: String?
+        let always: Bool
+        let target: Place?
+        let ruleFile: RuleFile?
+        let replaced: Replaced?
+        let folderInstructions: FolderInstructions?
+        let switchedOff: Bool
+        let alwaysOverBudget: Bool
+
+        init(kind: String, scope: String, entry: String, topic: String? = nil, description: String? = nil, always: Bool = false,
+             target: Place? = nil, ruleFile: RuleFile? = nil, replaced: Replaced? = nil,
+             folderInstructions: FolderInstructions? = nil, switchedOff: Bool = false, alwaysOverBudget: Bool = false) {
+            self.kind = kind
+            self.scope = scope
+            self.entry = entry
+            self.topic = topic
+            self.description = description
+            self.always = always
+            self.target = target
+            self.ruleFile = ruleFile
+            self.replaced = replaced
+            self.folderInstructions = folderInstructions
+            self.switchedOff = switchedOff
+            self.alwaysOverBudget = alwaysOverBudget
+        }
+
+        init(from decoder: any Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            kind = try container.decode(String.self, forKey: .kind)
+            scope = try container.decode(String.self, forKey: .scope)
+            entry = try container.decodeIfPresent(String.self, forKey: .entry) ?? ""
+            topic = try? container.decodeIfPresent(String.self, forKey: .topic)
+            description = try? container.decodeIfPresent(String.self, forKey: .description)
+            always = (try? container.decodeIfPresent(Bool.self, forKey: .always)) ?? false
+            target = try? container.decodeIfPresent(Place.self, forKey: .target)
+            ruleFile = try? container.decodeIfPresent(RuleFile.self, forKey: .ruleFile)
+            replaced = try? container.decodeIfPresent(Replaced.self, forKey: .replaced)
+            folderInstructions = try? container.decodeIfPresent(FolderInstructions.self, forKey: .folderInstructions)
+            switchedOff = (try? container.decodeIfPresent(Bool.self, forKey: .switchedOff)) ?? false
+            alwaysOverBudget = (try? container.decodeIfPresent(Bool.self, forKey: .alwaysOverBudget)) ?? false
+        }
+
+        /// Whether the rule goes along with every message: the file's own
+        /// setting when it exists, the proposal's when it is new.
+        var isAlways: Bool { kind == "rule" && (ruleFile?.always ?? always) }
+
+        private enum CodingKeys: String, CodingKey {
+            case kind, scope, entry, topic, description, always, target, ruleFile, replaced, folderInstructions, switchedOff, alwaysOverBudget
+        }
+    }
+
+    /// After a command (snotra#1319): the knowledge files it changed.
+    struct KnowledgeChange: Decodable, Equatable, Sendable {
+        struct File: Decodable, Equatable, Sendable {
+            let path: String
+            /// `added`, `changed` or `removed`.
+            let status: String
+        }
+
+        let files: [File]
     }
 
     /// What the tool would run or write, masked as on the desktop.
@@ -67,6 +166,14 @@ struct ApprovalRequest: Decodable, Identifiable, Equatable, Sendable {
     let sandbox: [SandboxEntry]
     /// The answers this connection may give.
     let options: [String]
+    /// A card about a file Snotra reads in every chat (snotra#1319): answered
+    /// only as proposed, and only by a phone that shows all of it.
+    let knowledge: Bool
+    /// The chat met a likely prompt injection, or the folder's own text a
+    /// covert signal (snotra#1280).
+    let knowledgeWarning: Bool
+    let knowledgeCard: KnowledgeCard?
+    let knowledgeChange: KnowledgeChange?
 
     var id: String { requestId }
 
@@ -81,7 +188,9 @@ struct ApprovalRequest: Decodable, Identifiable, Equatable, Sendable {
 
     init(requestId: String, chatId: String, tool: String, targets: [Target] = [], reason: String = "",
          checkpoint: String = "tool", preview: Preview? = nil, sandbox: [SandboxEntry] = [],
-         options: [String] = [Answer.allowOnce.rawValue, Answer.deny.rawValue]) {
+         options: [String] = [Answer.allowOnce.rawValue, Answer.deny.rawValue],
+         knowledge: Bool = false, knowledgeWarning: Bool = false,
+         knowledgeCard: KnowledgeCard? = nil, knowledgeChange: KnowledgeChange? = nil) {
         self.requestId = requestId
         self.chatId = chatId
         self.tool = tool
@@ -91,6 +200,10 @@ struct ApprovalRequest: Decodable, Identifiable, Equatable, Sendable {
         self.preview = preview
         self.sandbox = sandbox
         self.options = options
+        self.knowledge = knowledge
+        self.knowledgeWarning = knowledgeWarning
+        self.knowledgeCard = knowledgeCard
+        self.knowledgeChange = knowledgeChange
     }
 
     init(from decoder: any Decoder) throws {
@@ -105,9 +218,16 @@ struct ApprovalRequest: Decodable, Identifiable, Equatable, Sendable {
         preview = try? container.decodeIfPresent(Preview.self, forKey: .preview)
         sandbox = (try? container.decodeIfPresent(Sandbox.self, forKey: .sandbox))?.entries ?? []
         options = (try? container.decodeIfPresent([String].self, forKey: .options)) ?? []
+        knowledge = (try? container.decodeIfPresent(Bool.self, forKey: .knowledge)) ?? false
+        knowledgeWarning = (try? container.decodeIfPresent(Bool.self, forKey: .knowledgeWarning)) ?? false
+        knowledgeCard = try? container.decodeIfPresent(KnowledgeCard.self, forKey: .knowledgeCard)
+        knowledgeChange = try? container.decodeIfPresent(KnowledgeChange.self, forKey: .knowledgeChange)
     }
 
-    private enum CodingKeys: String, CodingKey { case requestId, chatId, tool, targets, reason, checkpoint, preview, sandbox, options }
+    private enum CodingKeys: String, CodingKey {
+        case requestId, chatId, tool, targets, reason, checkpoint, preview, sandbox, options
+        case knowledge, knowledgeWarning, knowledgeCard, knowledgeChange
+    }
 }
 
 /// How a card was settled (`approval.resolved`), shown as a note where the card stood.

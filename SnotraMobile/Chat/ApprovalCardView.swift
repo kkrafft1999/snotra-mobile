@@ -21,9 +21,12 @@ struct ApprovalCardView: View {
             .accessibilityIdentifier("approval.note")
         } else {
             VStack(alignment: .leading, spacing: 10) {
-                Label("Snotra asks for your approval", systemImage: "exclamationmark.shield")
+                Label(Self.heading(request), systemImage: "exclamationmark.shield")
                     .font(.footnote.weight(.semibold))
                     .foregroundStyle(.orange)
+                if request.knowledge {
+                    KnowledgeCardSection(request: request)
+                }
                 Text(request.reason.isEmpty ? request.tool : request.reason)
                     .font(.body)
                     .fixedSize(horizontal: false, vertical: true)
@@ -33,12 +36,28 @@ struct ApprovalCardView: View {
                         .foregroundStyle(.secondary)
                 }
                 ForEach(Array(request.targets.enumerated()), id: \.offset) { _, target in
+                    if request.knowledgeCard != nil || request.knowledgeChange != nil {
+                        EmptyView()
+                    } else {
                     Label {
-                        Text(target.path).lineLimit(2).truncationMode(.middle)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(target.path).lineLimit(2).truncationMode(.middle)
+                            if let kind = target.knowledge {
+                                Text(Self.knowledgeNote(kind))
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                if target.knowledgeAlways {
+                                    Text("always: goes along with every message")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
+                        }
                     } icon: {
                         Image(systemName: target.sensitive ? "lock.trianglebadge.exclamationmark" : "doc")
                     }
                     .font(.system(.footnote, design: .monospaced))
+                    }
                 }
                 ForEach(Array(request.sandbox.enumerated()), id: \.offset) { _, entry in
                     Label {
@@ -69,7 +88,7 @@ struct ApprovalCardView: View {
                         Button(role: .destructive) {
                             respond(.deny)
                         } label: {
-                            Text("Deny").frame(maxWidth: .infinity)
+                            Text(request.checkpoint == "knowledge" ? "Reset" : "Deny").frame(maxWidth: .infinity)
                         }
                         .buttonStyle(.bordered)
                         .accessibilityIdentifier("approval.deny")
@@ -78,7 +97,7 @@ struct ApprovalCardView: View {
                         Button {
                             respond(.allowOnce)
                         } label: {
-                            Label("Allow once", systemImage: "faceid").frame(maxWidth: .infinity)
+                            Label(Self.allowLabel(request), systemImage: "faceid").frame(maxWidth: .infinity)
                         }
                         .buttonStyle(.borderedProminent)
                         .foregroundStyle(Color.onAccent)
@@ -86,6 +105,11 @@ struct ApprovalCardView: View {
                     }
                 }
                 .disabled(answering)
+                if request.knowledge && request.offers(.deny) && !request.offers(.allowOnce) {
+                    Text("To allow it, answer it on your desktop.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
                 if !request.offers(.allowOnce) && !request.offers(.deny) {
                     Text("Answer it on your desktop.")
                         .font(.footnote)
@@ -97,6 +121,33 @@ struct ApprovalCardView: View {
             .background(Color.orange.opacity(0.08), in: .rect(cornerRadius: 16))
             .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(Color.orange.opacity(0.4)))
             .accessibilityIdentifier("approval.card")
+        }
+    }
+
+    /// The line above the card: what a knowledge card is about, or the plain question.
+    static func heading(_ request: ApprovalRequest) -> LocalizedStringResource {
+        if request.checkpoint == "knowledge" { return "A command changed a knowledge file" }
+        switch request.knowledgeCard?.kind {
+        case "fact": return "Snotra wants to remember a fact"
+        case "rule": return "Snotra wants to remember a rule"
+        case "instruction": return "Snotra wants to remember a procedure"
+        default: return "Snotra asks for your approval"
+        }
+    }
+
+    /// A knowledge card is answered as proposed (snotra-mobile#92); after a
+    /// command, *allow* keeps the change.
+    static func allowLabel(_ request: ApprovalRequest) -> LocalizedStringResource {
+        if request.checkpoint == "knowledge" { return "Keep" }
+        return request.knowledge ? "Allow as proposed" : "Allow once"
+    }
+
+    static func knowledgeNote(_ kind: String) -> LocalizedStringResource {
+        switch kind {
+        case "agents": "read by every tool in this folder, and by Snotra in every chat here"
+        case "memory": "project memory — Snotra reads it in every chat in this folder"
+        case "skills": "skill — Snotra can load it in every chat in this folder"
+        default: "rules file — Snotra reads it in every chat in this folder"
         }
     }
 
