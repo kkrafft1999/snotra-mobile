@@ -1,6 +1,7 @@
 import CryptoKit
 import DeviceCheck
 import Foundation
+import os
 
 /// App Check tokens from App Attest, through App Check's REST API (#51). One
 /// key per installation, attested once; every later token is an assertion
@@ -167,27 +168,38 @@ struct DeviceAppAttest: AppAttestService {
     var isSupported: Bool { DCAppAttestService.shared.isSupported }
 
     func generateKey() async throws -> String {
-        try await mapped { try await DCAppAttestService.shared.generateKey() }
+        try await mapped("generateKey") { try await DCAppAttestService.shared.generateKey() }
     }
 
     func attestKey(_ keyId: String, clientDataHash: Data) async throws -> Data {
-        try await mapped { try await DCAppAttestService.shared.attestKey(keyId, clientDataHash: clientDataHash) }
+        try await mapped("attestKey") { try await DCAppAttestService.shared.attestKey(keyId, clientDataHash: clientDataHash) }
     }
 
     func generateAssertion(_ keyId: String, clientDataHash: Data) async throws -> Data {
-        try await mapped { try await DCAppAttestService.shared.generateAssertion(keyId, clientDataHash: clientDataHash) }
+        try await mapped("generateAssertion") { try await DCAppAttestService.shared.generateAssertion(keyId, clientDataHash: clientDataHash) }
     }
 
-    private func mapped<T>(_ body: () async throws -> T) async throws -> T {
+    private func mapped<T>(_ operation: String, _ body: () async throws -> T) async throws -> T {
         do {
             return try await body()
         } catch let error as DCError {
-            switch error.code {
-            case .featureUnsupported: throw AppCheckError.unsupported
-            case .invalidKey: throw AppAttestKeyInvalid()
-            case .serverUnavailable: throw RelayError.unavailable
-            default: throw AppCheckError.refused
-            }
+            let underlying = (error as NSError).userInfo[NSUnderlyingErrorKey] as? NSError
+            Logger.relay.error("""
+                App Attest \(operation, privacy: .public) failed: DCError \(error.code.rawValue, privacy: .public), \
+                underlying \(underlying?.domain ?? "none", privacy: .public) \(underlying?.code ?? 0, privacy: .public)
+                """)
+            throw Self.failure(of: error.code)
+        }
+    }
+
+    /// Only what App Attest says about the key or the feature is about the app;
+    /// anything else — `unknownSystemFailure` above all — is the device's own trouble.
+    static func failure(of code: DCError.Code) -> any Error {
+        switch code {
+        case .featureUnsupported: return AppCheckError.unsupported
+        case .invalidKey: return AppAttestKeyInvalid()
+        case .serverUnavailable: return RelayError.unavailable
+        default: return AppCheckError.deviceFailure
         }
     }
 }

@@ -1,4 +1,5 @@
 import Foundation
+import os
 
 /// The network under the relay client, so that its logic runs in tests without one.
 protocol RelayTransport: Sendable {
@@ -24,11 +25,20 @@ struct URLSessionTransport: RelayTransport {
         session = URLSession(configuration: configuration)
     }
 
+    /// The `URLError` code tells a timeout, no network and a refused TLS handshake apart.
+    private static func logNoAnswer(_ request: URLRequest, _ error: any Error) {
+        Logger.relay.error("""
+            \(request.httpMethod ?? "GET", privacy: .public) \(LogText.path(of: request.url), privacy: .public) \
+            got no answer: \(LogText.error(error), privacy: .public)
+            """)
+    }
+
     func send(_ request: URLRequest) async throws -> (Data, HTTPURLResponse) {
         let (data, response): (Data, URLResponse)
         do {
             (data, response) = try await session.data(for: request)
         } catch {
+            Self.logNoAnswer(request, error)
             throw RelayError.unreachable
         }
         guard let http = response as? HTTPURLResponse else { throw RelayError.invalidResponse }
@@ -43,6 +53,7 @@ struct URLSessionTransport: RelayTransport {
         do {
             (bytes, response) = try await session.bytes(for: request)
         } catch {
+            Self.logNoAnswer(request, error)
             throw RelayError.unreachable
         }
         guard let http = response as? HTTPURLResponse else { throw RelayError.invalidResponse }

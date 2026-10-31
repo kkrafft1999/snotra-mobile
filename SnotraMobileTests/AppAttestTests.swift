@@ -153,6 +153,25 @@ struct AppAttestTests {
         #expect(flow.step == .failed(.deviceUnsupported))
         #expect(relay.requests.isEmpty)
     }
+
+    @MainActor @Test func appAttestFailingOnTheDeviceAsksForARestart() async throws {
+        let flow = PairingFlow(
+            relays: [relay.endpoint], transport: relay,
+            keyStore: DeviceKeyStore(store: MemoryStore(), kind: .software),
+            pairingStore: PairingStore(store: MemoryStore()),
+            wordList: try .bundled(),
+            appCheck: { _ in FailingAppCheck(error: .deviceFailure) })
+        flow.submit(typed: PairingCode(pairingId: "0111", secret: "EP9DZH4QPYT4HWW").symbols)
+        for _ in 0..<200 where flow.step == .claiming { try await Task.sleep(for: .milliseconds(10)) }
+        #expect(flow.step == .failed(.deviceFailure))
+    }
+}
+
+/// Fails every token with the same error.
+struct FailingAppCheck: AppCheckProvider {
+    let error: AppCheckError
+
+    func token(limitedUse: Bool) async throws -> String { throw error }
 }
 
 /// App Attest in memory: keys `key-1`, `key-2` …, attestations and assertions that name their key.

@@ -147,6 +147,13 @@ struct PairingFlowTests {
         #expect(await waitFor { $0 == .failed(.unreachable) })
     }
 
+    @Test func aRefusedClaimIsNotANetworkFailure() async throws {
+        relay.answers["claim"] = .init(status: 401, json: .object([:]))
+        flow.submit(typed: code.symbols)
+        #expect(await waitFor { $0 == .failed(.relayRefused) })
+        #expect(keyMemory.items.isEmpty)
+    }
+
     @Test func aMistypedKeyIsRefusedBeforeAnythingIsSent() {
         flow.submit(typed: String(code.symbols.dropLast()) + (code.check == "0" ? "1" : "0"))
         #expect(flow.step == .failed(.invalidCode(.invalidCheck)))
